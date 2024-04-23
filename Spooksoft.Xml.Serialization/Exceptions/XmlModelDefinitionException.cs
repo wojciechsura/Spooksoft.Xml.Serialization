@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization.Exceptions
 {
-
     [Serializable]
     public class XmlModelDefinitionException : Exception
     {

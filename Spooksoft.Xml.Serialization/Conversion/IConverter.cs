@@ -8,7 +8,7 @@ namespace Spooksoft.Xml.Serialization.Conversion
 {
     public interface IConverter
     {
-        string Serialize(object value);
-        object Deserialize(string value);
+        string Serialize(object? value);
+        object? Deserialize(string value);
     }
 }

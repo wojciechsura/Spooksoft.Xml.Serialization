@@ -9,11 +9,29 @@ namespace Spooksoft.Xml.Serialization.Conversion
 {
     internal static class DefaultConverters
     {
-        private readonly static IReadOnlyDictionary<Type, IConverter> converters;
+        private class EnumConverter : IConverter
+        {
+            private readonly Type type;
+
+            public EnumConverter(Type type)
+            {
+                this.type = type;
+            }
+
+            public object? Deserialize(string value)
+            {
+                return Enum.Parse(type, value);
+            }
+
+            public string Serialize(object? value)
+            {
+                return value?.ToString() ?? string.Empty;
+            }
+        }
 
         static DefaultConverters()
         {
-            converters = new Dictionary<Type, IConverter>()
+            Converters = new Dictionary<Type, IConverter>()
             {
                 { typeof(byte), new LambdaConverter(b => b.ToString()!, s => byte.Parse(s)) },
                 { typeof(sbyte), new LambdaConverter(sb => sb.ToString()!, s => sbyte.Parse(s)) },
@@ -29,6 +47,13 @@ namespace Spooksoft.Xml.Serialization.Conversion
                 { typeof(string), new LambdaConverter(s => (string)s, s => s) },
                 { typeof(bool), new LambdaConverter(b => b.ToString()!, s => bool.Parse(s)) }
             };            
+        }
+
+        internal static IReadOnlyDictionary<Type, IConverter> Converters { get; }
+
+        internal static IConverter GetEnumConverter(Type type)
+        {
+            return new EnumConverter(type);
         }
     }
 }

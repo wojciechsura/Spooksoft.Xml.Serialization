@@ -1,4 +1,5 @@
-﻿using Spooksoft.Xml.Serialization.Models.Construction;
+﻿using Spooksoft.Xml.Serialization.Attributes;
+using Spooksoft.Xml.Serialization.Models.Construction;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,10 @@ namespace Spooksoft.Xml.Serialization.Models
 {
     internal class CustomSerializableClassInfo : BaseClassInfo
     {
-        public CustomSerializableClassInfo(ParameterlessCtorConstructionInfo constructor) 
+        public CustomSerializableClassInfo(Type type,
+            XmlRootAttribute? rootAttribute, 
+            ParameterlessCtorConstructionInfo constructor) 
+            : base(type, rootAttribute)
         {
             Constructor = constructor;
         }

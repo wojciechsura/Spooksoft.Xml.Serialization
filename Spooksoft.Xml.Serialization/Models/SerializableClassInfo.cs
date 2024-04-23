@@ -11,16 +11,16 @@ namespace Spooksoft.Xml.Serialization.Models
 {
     internal class SerializableClassInfo : BaseClassInfo
     {
-        public SerializableClassInfo(XmlRootAttribute? rootAttribute,
+        public SerializableClassInfo(Type type,
+            XmlRootAttribute? rootAttribute,
             BaseClassConstructionInfo construction,
             IReadOnlyList<BasePropertyInfo> properties)
+            : base(type, rootAttribute)
         {
-            RootAttribute = rootAttribute;
+            
             ConstructionInfo = construction;
             Properties = properties;
         }
-
-        public XmlRootAttribute? RootAttribute { get; }
 
         public BaseClassConstructionInfo ConstructionInfo { get; }
         public IReadOnlyList<BasePropertyInfo> Properties { get; }

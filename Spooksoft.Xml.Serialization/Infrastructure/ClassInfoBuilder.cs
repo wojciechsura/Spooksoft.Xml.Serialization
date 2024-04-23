@@ -109,7 +109,7 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
 
             if (type.IsAssignableTo(typeof(IXmlSerializable)) && parameterlessCtor != null)
             {
-                return new CustomSerializableClassInfo(parameterlessCtor);
+                return new CustomSerializableClassInfo(type, xmlRoot, parameterlessCtor);
             }
 
             // 3. If there is no parameterless ctor, search for parametered one
@@ -205,7 +205,8 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
                 throw new XmlModelDefinitionException($"A read-only property {property.Name} of class {type.Name} can be serialized only if it matches a ctor parameter. If not, explicitly mark it with attribute {nameof(XmlIgnoreAttribute)}");
             }
 
-            return new SerializableClassInfo(xmlRoot,
+            return new SerializableClassInfo(type,
+                xmlRoot,
                 (parameterlessCtor as BaseClassConstructionInfo) ?? parameteredCtor,
                 typeProperties);
         }

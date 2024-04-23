@@ -59,7 +59,7 @@ namespace Spooksoft.Xml.Serialization
 
             lock(typeCacheLock)
             {
-                if (typeCache.TryGetValue(type, out classInfo))
+                if (!typeCache.TryGetValue(type, out classInfo))
                 {
                     classInfo = ClassInfoBuilder.BuildClassInfo(type);
                     typeCache[type] = classInfo;

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Spooksoft.Xml.Serialization.Models.Properties
+namespace Spooksoft.Xml.Serialization.Attributes
 {
-    internal class AttributePropertyInfo : BasePropertyInfo
+    public class XmlIgnoreAttribute : Attribute
     {
     }
 }

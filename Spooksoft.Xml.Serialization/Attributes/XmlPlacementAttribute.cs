@@ -8,14 +8,15 @@ using System.Threading.Tasks;
 namespace Spooksoft.Xml.Serialization.Attributes
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class XmlAttributeAttribute : XmlPlacementAttribute
+    public abstract class XmlPlacementAttribute : Attribute
     {
-        public XmlAttributeAttribute(string name)
-            : base(name)
+        protected XmlPlacementAttribute(string name)
         {
-            
+            Name = name;
         }
 
-        internal override XmlPlacement Placement => XmlPlacement.Attribute;
-    }
+        internal abstract XmlPlacement Placement { get; }
+
+        public string Name { get; }
+    }            
 }

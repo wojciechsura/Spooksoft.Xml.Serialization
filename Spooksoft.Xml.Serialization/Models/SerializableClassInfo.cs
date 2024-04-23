@@ -1,4 +1,5 @@
-﻿using Spooksoft.Xml.Serialization.Models.Construction;
+﻿using Spooksoft.Xml.Serialization.Attributes;
+using Spooksoft.Xml.Serialization.Models.Construction;
 using Spooksoft.Xml.Serialization.Models.Properties;
 using System;
 using System.Collections.Generic;
@@ -10,16 +11,17 @@ namespace Spooksoft.Xml.Serialization.Models
 {
     internal class SerializableClassInfo : BaseClassInfo
     {
-        public SerializableClassInfo(string rootElementName,
+        public SerializableClassInfo(XmlRootAttribute? rootAttribute,
             BaseClassConstructionInfo construction,
             IReadOnlyList<BasePropertyInfo> properties)
         {
-            RootElementName = rootElementName;
+            RootAttribute = rootAttribute;
             ConstructionInfo = construction;
             Properties = properties;
         }
 
-        public string RootElementName { get; }
+        public XmlRootAttribute? RootAttribute { get; }
+
         public BaseClassConstructionInfo ConstructionInfo { get; }
         public IReadOnlyList<BasePropertyInfo> Properties { get; }
     }

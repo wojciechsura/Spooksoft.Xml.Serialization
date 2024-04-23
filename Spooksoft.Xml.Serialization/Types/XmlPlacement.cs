@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Spooksoft.Xml.Serialization.Models.Properties
+namespace Spooksoft.Xml.Serialization.Types
 {
-    internal class ElementPropertyInfo : BasePropertyInfo
+    internal enum XmlPlacement
     {
+        Element = 1,
+        Attribute = 2
     }
 }

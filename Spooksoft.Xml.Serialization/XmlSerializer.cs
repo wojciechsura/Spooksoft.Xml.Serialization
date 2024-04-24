@@ -93,8 +93,7 @@ namespace Spooksoft.Xml.Serialization
                     throw new XmlSerializationException($"Cannot find converter for type {propertyType.Name} to serialize property {prop.Property.Name} of class {model.GetType().Name}");
 
                 // Get value of the property
-                object? value = prop.Property.GetValue(model) ??
-                    throw new XmlSerializationException($"Cannot store null value as text (e.g. in attribute). Property {prop.Property.Name} of class {model.GetType().Name}");
+                object? value = prop.Property.GetValue(model);
 
                 // Serialize
                 var attribute = document.CreateAttribute(prop.XmlName);
@@ -122,11 +121,7 @@ namespace Spooksoft.Xml.Serialization
                 var converter = converterProvider.GetConverter(propertyType);
                 if (converter != null)
                 {
-                    // If there is a converter for this type, serialize as string
-
-                    if (value == null)
-                        throw new XmlSerializationException($"Cannot store null value as text (e.g. in attribute). Property {simpleProp.Property.Name} of class {model.GetType().Name}");
-
+                    // If there is a converter for this type, serialize as string                    
                     var element = document.CreateElement(simpleProp.XmlName);
                     element.InnerText = converter.Serialize(value);
                     classElement.AppendChild(element);

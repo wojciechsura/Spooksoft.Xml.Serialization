@@ -53,6 +53,85 @@ namespace Spooksoft.Xml.Serialization.Test
         }
 
         [TestMethod]
+        public void SerializeDeserializeMaxRangesTest()
+        {
+            // Arrange
+
+            var model = new SimpleModel
+            {
+                ByteProperty = byte.MaxValue,
+                SByteProperty = sbyte.MinValue,
+                ShortProperty = short.MinValue,
+                UShortProperty = ushort.MaxValue,
+                IntProperty = int.MinValue,
+                UIntProperty = uint.MaxValue,
+                LongProperty = long.MinValue,
+                ULongProperty = ulong.MaxValue,
+                BoolProperty = false,
+                FloatProperty = float.MaxValue,
+                DoubleProperty = double.MaxValue,
+                DecimalProperty = decimal.MaxValue
+            };
+
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(model, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.AreEqual(model.ByteProperty, deserialized.ByteProperty);
+            Assert.AreEqual(model.SByteProperty, deserialized.SByteProperty);
+            Assert.AreEqual(model.ShortProperty, deserialized.ShortProperty);
+            Assert.AreEqual(model.UShortProperty, deserialized.UShortProperty);
+            Assert.AreEqual(model.IntProperty, deserialized.IntProperty);
+            Assert.AreEqual(model.UIntProperty, deserialized.UIntProperty);
+            Assert.AreEqual(model.LongProperty, deserialized.LongProperty);
+            Assert.AreEqual(model.ULongProperty, deserialized.ULongProperty);
+            Assert.AreEqual(model.BoolProperty, deserialized.BoolProperty);            
+            Assert.AreEqual(model.FloatProperty, deserialized.FloatProperty, float.Epsilon);
+            Assert.AreEqual(model.DoubleProperty, deserialized.DoubleProperty, double.Epsilon);
+            Assert.AreEqual(model.DecimalProperty, deserialized.DecimalProperty);
+        }
+
+        [TestMethod]
+        public void SerializeNullableDeserializeTest()
+        {
+            // Arrange
+
+            var model = new SimpleNullableModel
+            {
+                
+            };
+
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(model, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.IsNull(deserialized.ByteProperty);
+            Assert.IsNull(deserialized.SByteProperty);
+            Assert.IsNull(deserialized.ShortProperty);
+            Assert.IsNull(deserialized.UShortProperty);
+            Assert.IsNull(deserialized.IntProperty);
+            Assert.IsNull(deserialized.UIntProperty);
+            Assert.IsNull(deserialized.LongProperty);
+            Assert.IsNull(deserialized.ULongProperty);
+            Assert.IsNull(deserialized.BoolProperty);
+            Assert.IsNull(deserialized.FloatProperty);
+            Assert.IsNull(deserialized.DoubleProperty);
+            Assert.IsNull(deserialized.DecimalProperty);
+        }
+
+
+
+        [TestMethod]
         public void NestedSerializationTest() 
         {
             // Arrange

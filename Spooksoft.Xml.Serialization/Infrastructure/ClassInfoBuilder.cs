@@ -177,7 +177,7 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
                     // to be readable. We don't need to check types because 
                     // it was already done during parametered ctor extraction.
 
-                    var ctorParamProp = new ConstructorParameterPropertyInfo(matchingCtorParamIndex.Value, property, placementAttribute);
+                    var ctorParamProp = new SimplePropertyInfo(property, placementAttribute, matchingCtorParamIndex.Value);
 
                     if (typeProperties.Exists(tp => tp.MatchesXmlPlacement(ctorParamProp)))
                         throw new XmlModelDefinitionException($"Two or more properties in type {type.Name} matches XML placement of {ctorParamProp.XmlPlacement} and name {ctorParamProp.XmlName}");
@@ -190,7 +190,7 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
 
                 if (property.CanWrite)
                 {
-                    var simpleProp = new SimplePropertyInfo(property, placementAttribute);
+                    var simpleProp = new SimplePropertyInfo(property, placementAttribute, null);
 
                     if (typeProperties.Exists(tp => tp.MatchesXmlPlacement(simpleProp)))
                         throw new XmlModelDefinitionException($"Two or more properties in type {type.Name} matches XML placement of {simpleProp.XmlPlacement} and name {simpleProp.XmlName}");
@@ -205,9 +205,11 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
                 throw new XmlModelDefinitionException($"A read-only property {property.Name} of class {type.Name} can be serialized only if it matches a ctor parameter. If not, explicitly mark it with attribute {nameof(XmlIgnoreAttribute)}");
             }
 
+            BaseClassConstructionInfo ctor = (BaseClassConstructionInfo?)parameterlessCtor ?? parameteredCtor!;
+
             return new SerializableClassInfo(type,
                 xmlRoot,
-                (parameterlessCtor as BaseClassConstructionInfo) ?? parameteredCtor,
+                ctor,
                 typeProperties);
         }
     }

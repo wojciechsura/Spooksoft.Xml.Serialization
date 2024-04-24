@@ -11,10 +11,13 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
 {
     internal abstract class BasePropertyInfo
     {
-        protected BasePropertyInfo(PropertyInfo property, XmlPlacementAttribute? placementAttribute)
+        protected BasePropertyInfo(PropertyInfo property, 
+            XmlPlacementAttribute? placementAttribute,
+            int? constructorParameterIndex)
         {
             Property = property;
             PlacementAttribute = placementAttribute;
+            ConstructorParameterIndex = constructorParameterIndex;
         }
 
         /// <summary>
@@ -28,6 +31,8 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
 
         public PropertyInfo Property { get; }
         public XmlPlacementAttribute? PlacementAttribute { get; }
+
+        public int? ConstructorParameterIndex { get; }
 
         public string XmlName => PlacementAttribute != null ? PlacementAttribute.Name : Property.Name;
 

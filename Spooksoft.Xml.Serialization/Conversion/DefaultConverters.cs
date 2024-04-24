@@ -18,14 +18,14 @@ namespace Spooksoft.Xml.Serialization.Conversion
                 this.type = type;
             }
 
-            public object? Deserialize(string value)
+            public object Deserialize(string value)
             {
                 return Enum.Parse(type, value);
             }
 
-            public string Serialize(object? value)
+            public string Serialize(object value)
             {
-                return value?.ToString() ?? string.Empty;
+                return value.ToString() ?? string.Empty;
             }
         }
 

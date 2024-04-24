@@ -8,12 +8,14 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization.Models.Properties
 {
-    internal class SimplePropertyInfo : BasePropertyInfo
+    internal class CollectionPropertyInfo : BasePropertyInfo
     {
-        public SimplePropertyInfo(PropertyInfo property, XmlPlacementAttribute? placementAttribute, int? constructorParameterIndex) 
+        public CollectionPropertyInfo(PropertyInfo property, 
+            XmlPlacementAttribute? placementAttribute, 
+            int? constructorParameterIndex) 
             : base(property, placementAttribute, constructorParameterIndex)
         {
 
-        }   
+        }
     }
 }

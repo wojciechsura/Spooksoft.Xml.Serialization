@@ -76,6 +76,13 @@ namespace Spooksoft.Xml.Serialization.Test
             var ms = new MemoryStream();
             serializer.Serialize(nested, ms);
 
+            // DEBUG START
+            ms.Seek(0, SeekOrigin.Begin);
+            var reader = new StreamReader(ms);
+            string xml = reader.ReadToEnd();
+            System.Diagnostics.Debug.WriteLine(xml);
+            // DEBUG END
+
             ms.Seek(0, SeekOrigin.Begin);
             var deserialized = serializer.Deserialize<NestedModel>(ms);
 

@@ -24,9 +24,9 @@ namespace Spooksoft.Xml.Serialization.Test.Models.CustomSerialization
             this.field2 = field2;
         }
 
-        public void ReadXml(XmlReader reader)
+        public void Read(XmlElement element)
         {
-            string? values = reader.GetAttribute("Values");
+            string? values = element.GetAttribute("Values");
 
             if (values != null)
             {
@@ -42,9 +42,9 @@ namespace Spooksoft.Xml.Serialization.Test.Models.CustomSerialization
             }
         }
 
-        public void WriteXml(XmlWriter writer)
+        public void Write(XmlElement element)
         {
-            writer.WriteAttributeString("Values", $"{IntProperty1}|{IntProperty2}");
+            element.SetAttribute("Values", $"{IntProperty1}|{IntProperty2}");
         }
 
         public int IntProperty1 => field1;

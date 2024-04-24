@@ -9,7 +9,7 @@ namespace Spooksoft.Xml.Serialization.Types
 {
     public interface IXmlSerializable
     {
-        void WriteXml(XmlWriter writer);
-        void ReadXml(XmlReader reader);
+        void Write(XmlElement element);
+        void Read(XmlElement element);
     }
 }

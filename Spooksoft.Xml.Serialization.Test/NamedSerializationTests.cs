@@ -37,10 +37,10 @@ namespace Spooksoft.Xml.Serialization.Test
             // Assert
 
             Assert.IsNotNull(doc);
-            Assert.AreEqual("MySimpleModel", doc.Name);
 
             var root = doc.ChildNodes[0];
             Assert.IsNotNull(root);
+            Assert.AreEqual("MySimpleModel", root.Name);
 
             var intPropNode = root.ChildNodes.OfType<XmlElement>().FirstOrDefault(n => n.Name == "MyIntProperty");
             Assert.IsNotNull(intPropNode);
@@ -57,7 +57,7 @@ namespace Spooksoft.Xml.Serialization.Test
         {
             // Arrange
 
-            string xml = "<MySimpleModel StringProperty=\"Test\"><MyIntProperty>5</MyIntProperty></MySimpleModel>";
+            string xml = "<MySimpleModel MyStringProperty=\"Test\"><MyIntProperty>5</MyIntProperty></MySimpleModel>";
             
             var serializer = new XmlSerializer();   
             
@@ -66,6 +66,7 @@ namespace Spooksoft.Xml.Serialization.Test
             var ms = new MemoryStream();
             var writer = new StreamWriter(ms);
             writer.Write(xml);
+            writer.Flush();
 
             ms.Seek(0, SeekOrigin.Begin);
             var model = serializer.Deserialize<SimpleModel>(ms);

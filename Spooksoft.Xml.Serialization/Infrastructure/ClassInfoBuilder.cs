@@ -171,6 +171,15 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
                     }
                 }
 
+                // Check if property is a collection
+
+                var xmlArray = property.GetCustomAttribute<XmlArrayAttribute>();
+                if (xmlArray != null)
+                {
+
+                }
+
+
                 if (matchingCtorParam != null && matchingCtorParamIndex != null)
                 {
                     // If the property matches ctor param, it is enough for it

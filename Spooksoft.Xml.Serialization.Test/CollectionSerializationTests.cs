@@ -1,4 +1,5 @@
 ﻿using Spooksoft.Xml.Serialization.Test.Models.Collection;
+using Spooksoft.Xml.Serialization.Test.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,11 +37,7 @@ namespace Spooksoft.Xml.Serialization.Test
 
             // Act
 
-            var ms = new MemoryStream();
-            serializer.Serialize(list, ms);
-
-            ms.Seek(0, SeekOrigin.Begin);
-            var deserialized = serializer.Deserialize<CollectionModel>(ms);
+            var deserialized = Automate.SerializeDeserialize(list, serializer);
 
             // Assert
 
@@ -56,6 +53,101 @@ namespace Spooksoft.Xml.Serialization.Test
             Assert.IsInstanceOfType(deserialized.List[1], typeof(ListItemB));
             Assert.AreEqual(2, ((ListItemB)deserialized.List[1]).IntProperty);
             Assert.AreEqual(3, ((ListItemB)deserialized.List[1]).LongProperty);
+        }
+
+        [TestMethod]
+        public void SimpleCollectionSerializationTest()
+        {
+            // Arrange
+
+            var simpleCollection = new SimpleCollectionModel
+            {
+                Strings = new List<string?> { "One", "Two" }
+            };
+
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(simpleCollection, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.IsNotNull(deserialized.Strings);
+            Assert.AreEqual(2, deserialized.Strings.Count);
+            Assert.AreEqual("One", deserialized.Strings[0]);
+            Assert.AreEqual("Two", deserialized.Strings[1]);
+        }
+
+        [TestMethod]
+        public void NullCollectionSerializationTest()
+        {
+            // Arrange
+
+            var simpleCollection = new SimpleCollectionModel
+            {
+                Strings = null
+            };
+
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(simpleCollection, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.IsNull(deserialized.Strings);
+        }
+
+        [TestMethod]
+        public void EmptyCollectionSerializationTest()
+        {
+            // Arrange
+
+            var simpleCollection = new SimpleCollectionModel
+            {
+                Strings = new()
+            };
+
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(simpleCollection, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.IsNotNull(deserialized.Strings);
+            Assert.AreEqual(0, deserialized.Strings.Count);
+        }
+
+        [TestMethod]
+        public void NullCollectionItemSerializationTest()
+        {
+            // Arrange
+
+            var simpleCollection = new SimpleCollectionModel
+            {
+                Strings = new() { null, null }
+            };
+
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(simpleCollection, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.IsNotNull(deserialized.Strings);
+            Assert.AreEqual(2, deserialized.Strings.Count);
+            Assert.IsNull(deserialized.Strings[0]);
+            Assert.IsNull(deserialized.Strings[1]);
         }
     }
 }

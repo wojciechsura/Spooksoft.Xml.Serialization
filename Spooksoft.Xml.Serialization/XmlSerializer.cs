@@ -1,4 +1,6 @@
-﻿using Spooksoft.Xml.Serialization.Exceptions;
+﻿using Spooksoft.Xml.Serialization.Attributes;
+using Spooksoft.Xml.Serialization.Common;
+using Spooksoft.Xml.Serialization.Exceptions;
 using Spooksoft.Xml.Serialization.Infrastructure;
 using Spooksoft.Xml.Serialization.Models;
 using Spooksoft.Xml.Serialization.Models.Construction;
@@ -7,6 +9,7 @@ using Spooksoft.Xml.Serialization.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text;
@@ -15,7 +18,7 @@ using System.Xml;
 
 namespace Spooksoft.Xml.Serialization
 {
-    public class XmlSerializer
+    public class XmlSerializer : IXmlSerializationProvider
     {
         // Private types ------------------------------------------------------
 
@@ -57,7 +60,7 @@ namespace Spooksoft.Xml.Serialization
             }
 
             public SerializableClassInfo SerializableClassInfo { get; }
-            public string? NodeContents { get; set; } = null;
+            public bool IsNull { get; set; } = false;
             public List<PropertyValue> PropertyValues { get; } = new();
             public List<ConstructorParameterValue?> ConstructorParameterValues { get; } = new();
         }
@@ -69,6 +72,7 @@ namespace Spooksoft.Xml.Serialization
 
         private readonly IClassInfoProvider classInfoProvider;
         private readonly IConverterProvider converterProvider;
+        private readonly ICollectionSerializerProvider collectionSerializerProvider;
 
         private XmlSerializerConfig config;
 
@@ -79,63 +83,83 @@ namespace Spooksoft.Xml.Serialization
             XmlElement classElement, 
             XmlDocument document)
         {
-            // Get property type
-            var propertyType = prop.Property.PropertyType;
+            if (prop is SimplePropertyInfo)
+            {
+                // Get property type
+                var propertyType = prop.Property.PropertyType;
 
-            // Find converter
-            var converter = converterProvider.GetConverter(propertyType) ??
-                throw new XmlSerializationException($"Cannot find converter for type {propertyType.Name} to serialize property {prop.Property.Name} of class {model.GetType().Name}");
+                // Find converter
+                var converter = converterProvider.GetConverter(propertyType) ??
+                    throw new XmlSerializationException($"Cannot find converter for type {propertyType.Name} to serialize property {prop.Property.Name} of class {model.GetType().Name}");
 
-            // Get value of the property
-            object? value = prop.Property.GetValue(model) ?? 
-                throw new XmlSerializationException($"Cannot store null value as text (e.g. in attribute). Property {prop.Property.Name} of class {model.GetType().Name}");
+                // Get value of the property
+                object? value = prop.Property.GetValue(model) ??
+                    throw new XmlSerializationException($"Cannot store null value as text (e.g. in attribute). Property {prop.Property.Name} of class {model.GetType().Name}");
 
-            // Serialize
-            var attribute = document.CreateAttribute(prop.XmlName);
-            attribute.Value = converter.Serialize(value);
-            classElement.Attributes.Append(attribute);
+                // Serialize
+                var attribute = document.CreateAttribute(prop.XmlName);
+                attribute.Value = converter.Serialize(value);
+                classElement.Attributes.Append(attribute);
+            }
+            else
+                throw new InvalidOperationException($"Can not serialize property other than {nameof(SimplePropertyInfo)} to an attribue!");
         }
 
         private void SerializePropertyToElement(object model,
-            BasePropertyInfo prop, 
+            BasePropertyInfo property, 
             XmlElement classElement,
             XmlDocument document)
         {
-            // Get property type
-            var propertyType = prop.Property.PropertyType;
-
-            // Get property value
-            var value = prop.Property.GetValue(model);
-
-            // Find converter
-            var converter = converterProvider.GetConverter(propertyType);
-            if (converter != null)
+            if (property is SimplePropertyInfo simpleProp)
             {
-                // If there is a converter for this type, serialize as string
+                // Get property type
+                var propertyType = simpleProp.Property.PropertyType;
 
-                if (value == null)
-                    throw new XmlSerializationException($"Cannot store null value as text (e.g. in attribute). Property {prop.Property.Name} of class {model.GetType().Name}");
+                // Get property value
+                var value = simpleProp.Property.GetValue(model);
 
-                var element = document.CreateElement(prop.XmlName);
-                element.InnerText = converter.Serialize(value);
-                classElement.AppendChild(element);
+                // Find converter
+                var converter = converterProvider.GetConverter(propertyType);
+                if (converter != null)
+                {
+                    // If there is a converter for this type, serialize as string
 
-                return;
+                    if (value == null)
+                        throw new XmlSerializationException($"Cannot store null value as text (e.g. in attribute). Property {simpleProp.Property.Name} of class {model.GetType().Name}");
+
+                    var element = document.CreateElement(simpleProp.XmlName);
+                    element.InnerText = converter.Serialize(value);
+                    classElement.AppendChild(element);
+                }
+                else if (propertyType.IsClass)
+                {
+                    // If it is a class, serialize recursively
+
+                    var propertyElement = document.CreateElement(simpleProp.XmlName);
+                    var subElement = SerializeObjectToElement(value, propertyType, classElement.OwnerDocument);
+                    propertyElement.AppendChild(subElement);
+                    classElement.AppendChild(propertyElement);
+                }
+                else throw new XmlSerializationException($"Cannot serialize property {simpleProp.Property.Name} of class {model.GetType().Name}. No suitable serialization method for type {propertyType.Name}");
             }
-
-            if (propertyType.IsClass)
+            else if (property is CollectionPropertyInfo collectionProp)
             {
-                // If it is a class, serialize recursively
+                // Get property type
+                var propertyType = collectionProp.Property.PropertyType;
 
-                var propertyElement = document.CreateElement(prop.XmlName);
-                var subElement = SerializeObjectToElement(value, propertyType, classElement.OwnerDocument);
-                propertyElement.AppendChild(subElement);
+                // Get property value
+                var value = collectionProp.Property.GetValue(model);
+
+                // Get collection serializer
+                var serializer = collectionSerializerProvider.GetCollectionSerializer(propertyType) ?? 
+                    throw new XmlSerializationException($"Cannot serialize property {collectionProp.Property.Name} of class {model.GetType().Name}. No suitable collection serializer found for type {propertyType.Name}");
+
+                var propertyElement = document.CreateElement(collectionProp.XmlName);
+                serializer.Serialize(value, model.GetType(), collectionProp, propertyElement, document, this);
                 classElement.AppendChild(propertyElement);
-
-                return;
             }
-
-            throw new XmlSerializationException($"Cannot serialize property {prop.Property.Name} of class {model.GetType().Name}. No suitable serialization method for type {propertyType}");
+            else
+                throw new InvalidOperationException("Unsupported property info!");
         }
 
         private XmlElement SerializeObjectToElement(object? model, Type modelType, XmlDocument document)
@@ -145,11 +169,21 @@ namespace Spooksoft.Xml.Serialization
 
             var classInfo = classInfoProvider.GetClassInfo(modelType);
 
-            var result = document.CreateElement(classInfo.XmlRoot);
+            return SerializeObjectToElement(model, modelType, classInfo.XmlRoot, document);
+        }
+
+        private XmlElement SerializeObjectToElement(object? model, Type modelType, string elementName, XmlDocument document)
+        {
+            ArgumentNullException.ThrowIfNull(modelType);
+            ArgumentNullException.ThrowIfNull(document);
+
+            var classInfo = classInfoProvider.GetClassInfo(modelType);
+
+            var result = document.CreateElement(elementName);
 
             if (model == null)
             {
-                result.InnerText = "null";
+                result.SetAttribute(Constants.NIL_ATTRIBUTE, Constants.CONTROL_NAMESPACE_URI, "true");
             }
             else
             {                
@@ -191,6 +225,8 @@ namespace Spooksoft.Xml.Serialization
             ArgumentNullException.ThrowIfNull(document);
 
             var element = SerializeObjectToElement(model, modelType, document);
+            element.SetAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+            
             document.AppendChild(element);
         }
 
@@ -255,6 +291,16 @@ namespace Spooksoft.Xml.Serialization
         {
             foreach (XmlAttribute attribute in element.Attributes)
             {
+                // Skip namespace definition attributes
+
+                if (attribute.Name == "xmlns" || attribute.Name.StartsWith("xmlns:"))
+                    continue;
+
+                // Skip namespaced attributes - they are dealt with differently
+
+                if (!string.IsNullOrEmpty(attribute.NamespaceURI))
+                    continue;
+
                 // Find property stored in an attribute
 
                 var propInfo = data.SerializableClassInfo.Properties
@@ -268,10 +314,13 @@ namespace Spooksoft.Xml.Serialization
                         continue;
                 }
 
+                if (propInfo is not SimplePropertyInfo simplePropInfo)
+                    throw new XmlSerializationException($"Property {propInfo.Property.Name} of class {data.SerializableClassInfo.Type.Name} is defined as an {nameof(XmlArrayAttribute)}, which means it can be placed only in an element.");
+
                 // Get converter for found property type
 
-                var converter = converterProvider.GetConverter(propInfo.Property.PropertyType) ??
-                    throw new XmlSerializationException($"No converter found for type {propInfo.Property.PropertyType.Name} to deserialize property {propInfo.Property.Name} of class {data.SerializableClassInfo.Type.Name}");
+                var converter = converterProvider.GetConverter(simplePropInfo.Property.PropertyType) ??
+                    throw new XmlSerializationException($"No converter found for type {simplePropInfo.Property.PropertyType.Name} to deserialize property {simplePropInfo.Property.Name} of class {data.SerializableClassInfo.Type.Name}");
 
                 // Deserialize value of the property
 
@@ -283,23 +332,23 @@ namespace Spooksoft.Xml.Serialization
                 catch (Exception e)
                 {
                     if (config.ErrorOnFailedAttributeDeserialization)
-                        throw new XmlSerializationException($"Failed to deserialize attribute value {attribute.Value} to {propInfo.Property.PropertyType.Name}", e);
+                        throw new XmlSerializationException($"Failed to deserialize attribute value {attribute.Value} to {simplePropInfo.Property.PropertyType.Name}", e);
                     else
                         continue;
                 }
 
                 // Store deserialized value, depending on kind of property
 
-                if (propInfo.ConstructorParameterIndex != null)
+                if (simplePropInfo.ConstructorParameterIndex != null)
                 {
-                    while (data.ConstructorParameterValues.Count <= propInfo.ConstructorParameterIndex.Value)
+                    while (data.ConstructorParameterValues.Count <= simplePropInfo.ConstructorParameterIndex.Value)
                         data.ConstructorParameterValues.Add(null);
 
-                    data.ConstructorParameterValues[propInfo.ConstructorParameterIndex.Value] = new ConstructorParameterValue(propInfo, value);
+                    data.ConstructorParameterValues[simplePropInfo.ConstructorParameterIndex.Value] = new ConstructorParameterValue(simplePropInfo, value);
                 }
                 else
                 {
-                    data.PropertyValues.Add(new PropertyValue(propInfo, value));
+                    data.PropertyValues.Add(new PropertyValue(simplePropInfo, value));
                 }
             }
         }
@@ -322,43 +371,57 @@ namespace Spooksoft.Xml.Serialization
                     }
                 }
 
-                // Try to get a converter for property type
-
-                var converter = converterProvider.GetConverter(propInfo.Property.PropertyType);
-
                 object? value = null;
 
-                if (converter != null)
+                if (propInfo is SimplePropertyInfo simplePropInfo)
                 {
-                    // The node is expected to contain text only
-                    string? contents = subElement.InnerText ?? string.Empty;
+                    // Try to get a converter for property type
 
-                    // Try to deserialize
+                    var converter = converterProvider.GetConverter(propInfo.Property.PropertyType);
 
-                    try
+                    if (converter != null)
                     {
-                        value = converter.Deserialize(contents);
+                        // The node is expected to contain text only
+                        string? contents = subElement.InnerText ?? string.Empty;
+
+                        // Try to deserialize
+
+                        try
+                        {
+                            value = converter.Deserialize(contents);
+                        }
+                        catch (Exception e)
+                        {
+                            if (config.ErrorOnNotRecognizedProperties)
+                                throw new XmlSerializationException($"Failed to deserialize element value {subElement.Value} to {propInfo.Property.PropertyType.Name}", e);
+                            else
+                                continue;
+                        }
                     }
-                    catch (Exception e)
+                    else
                     {
-                        if (config.ErrorOnNotRecognizedProperties)
-                            throw new XmlSerializationException($"Failed to deserialize element value {subElement.Value} to {propInfo.Property.PropertyType.Name}", e);
-                        else
-                            continue;
+                        var propertyType = propInfo.Property.PropertyType;
+
+                        var children = subElement.ChildNodes.OfType<XmlElement>().ToArray();
+                        if (children.Length != 1)
+                            throw new XmlSerializationException($"Expected a single sub-element for node {subElement.Name} representing property {propInfo.Property.Name} of class {data.SerializableClassInfo.Type.Name}");
+
+                        var child = children[0];
+
+                        value = DeserializeExpectedType(propertyType, child.Name, child, document);
                     }
+                }
+                else if (propInfo is CollectionPropertyInfo collectionProp)
+                {
+                    // Try to get a serializer for collection
+
+                    var serializer = collectionSerializerProvider.GetCollectionSerializer(collectionProp.Property.PropertyType) ?? 
+                        throw new XmlSerializationException($"Cannot deserialize property {collectionProp.Property.Name} of class {data.SerializableClassInfo.Type.Name}. No suitable collection serializer found for type {collectionProp.Property.PropertyType.Name}");
+
+                    value = serializer.Deserialize(data.SerializableClassInfo.Type, collectionProp, subElement, document, this);
                 }
                 else
-                {
-                    var propertyType = propInfo.Property.PropertyType;
-
-                    var children = subElement.ChildNodes.OfType<XmlElement>().ToArray();
-                    if (children.Length != 1)
-                        throw new XmlSerializationException($"Expected a single sub-element for node {subElement.Name} representing property {propInfo.Property.Name} of class {data.SerializableClassInfo.Type.Name}");
-
-                    var child = children[0];
-
-                    value = DeserializeExpectedType(propertyType, child, document);
-                }
+                    throw new InvalidOperationException("Unsupported property info!");
 
                 // Store deserialized value, depending on kind of property
 
@@ -376,11 +439,13 @@ namespace Spooksoft.Xml.Serialization
             }
         }
 
-        private void CollectXmlInnerTextDeserializationData(ClassDeserializationData data, XmlElement element, XmlDocument document)
+        private void CollectNullDeserializationData(ClassDeserializationData data, XmlElement element, XmlDocument document)
         {
-            if (!element.ChildNodes.OfType<XmlElement>().Any() &&
-                            element.Attributes.Count == 0)
-                data.NodeContents = element.InnerText;
+            var attribute = element.Attributes.OfType<XmlAttribute>().FirstOrDefault(attr => attr.NamespaceURI == Constants.CONTROL_NAMESPACE_URI && attr.LocalName == Constants.NIL_ATTRIBUTE);
+            if (attribute != null && attribute.Value.ToLower() == "true")
+            {
+                data.IsNull = true;
+            }
         }
 
         private object? DeserializeClass(Type type, SerializableClassInfo serializableClassInfo, XmlElement element, XmlDocument document)
@@ -390,28 +455,15 @@ namespace Spooksoft.Xml.Serialization
             ClassDeserializationData deserializationContext = new(serializableClassInfo);
             CollectXmlAttributeDeserializationData(deserializationContext, element, document);
             CollectXmlElementDeserializationData(deserializationContext, element, document);
-            CollectXmlInnerTextDeserializationData(deserializationContext, element, document);
+            CollectNullDeserializationData(deserializationContext, element, document);
 
             // Collected all information about the deserialized object
             // Time to instantiate it and actually fill with deserialized
             // data.
 
-            if (deserializationContext.NodeContents != null)
+            if (deserializationContext.IsNull)
             {
-                // The only valid case is text "null" in which case
-                // we simply return null
-
-                if (deserializationContext.NodeContents == "null")
-                {
-                    if (deserializationContext.PropertyValues.Count > 0 || deserializationContext.ConstructorParameterValues.Count > 0)
-                        throw new XmlSerializationException($"Error while deserializing type {type.Name}: element can only contain text \"null\" if there are no attributes or elements present!");
-
-                    return null;
-                }
-                else
-                {
-                    throw new XmlSerializationException($"The only valid text content of an element representing class instance is \"null\", found \"{deserializationContext.NodeContents}\" instead.");
-                }
+                return null;
             }
 
             // Construct the object
@@ -464,7 +516,7 @@ namespace Spooksoft.Xml.Serialization
             }
         }
 
-        private object? DeserializeExpectedTypes(Type baseType, List<Type> expectedDescendingTypes, XmlElement element, XmlDocument document)
+        private object? DeserializeExpectedTypes(Type baseType, Dictionary<string, Type> expectedDescendingTypes, XmlElement element, XmlDocument document)
         {
             ArgumentNullException.ThrowIfNull(baseType);
             ArgumentNullException.ThrowIfNull(expectedDescendingTypes);
@@ -480,33 +532,21 @@ namespace Spooksoft.Xml.Serialization
             // Check if expected descending types are indeed descending from
             // the base one
 
-            foreach (var type in expectedDescendingTypes)
-                if (!type.IsAssignableTo(baseType))
-                    throw new InvalidOperationException($"Type {type.Name} is not assignable to {baseType.Name}!");
-
-            // Collect class infos for all types
-
-            var classInfos = expectedDescendingTypes
-                .Select(t => classInfoProvider.GetClassInfo(t))
-                .ToList();
+            foreach (var kvp in expectedDescendingTypes)
+                if (!kvp.Value.IsAssignableTo(baseType))
+                    throw new InvalidOperationException($"Type {kvp.Value.Name} is not assignable to {baseType.Name}!");
 
             // Start processing XML
 
-            int i = classInfos.Count - 1;
-            while (i >= 0 && classInfos[i].XmlRoot != element.Name)
-                i--;
-
-            if (i < 0)
+            if (!expectedDescendingTypes.TryGetValue(element.Name, out Type? type) || type == null)
                 throw new XmlSerializationException($"Node name {element.Name} does not match any of given types!");
 
-            object? result = DeserializeType(classInfos[i].Type, element, document);
-
-            // It is expected that DeserializeType will stop at the closing tag
+            object? result = DeserializeType(type, element, document);
 
             return result;
         }
 
-        private object? DeserializeExpectedType(Type expectedType, XmlElement element, XmlDocument document)            
+        private object? DeserializeExpectedType(Type expectedType, string expectedName, XmlElement element, XmlDocument document)
         {
             ArgumentNullException.ThrowIfNull(expectedType);
             ArgumentNullException.ThrowIfNull(element);
@@ -514,7 +554,7 @@ namespace Spooksoft.Xml.Serialization
             if (!expectedType.IsClass)
                 throw new InvalidOperationException("Type passed to DeserializeExpectedType must be a class!");
 
-            return DeserializeExpectedTypes(expectedType, new List<Type> { expectedType }, element, document);
+            return DeserializeExpectedTypes(expectedType, new Dictionary<string, Type> { { expectedName, expectedType } }, element, document);
         }
 
         private object? Deserialize(Type type, XmlDocument document)
@@ -525,6 +565,21 @@ namespace Spooksoft.Xml.Serialization
             var rootNode = (XmlElement)document.ChildNodes[0]!;
             return DeserializeType(type, rootNode, document);
         }
+
+        // IXmlSerializationProvider implementation ---------------------------
+
+        XmlElement IXmlSerializationProvider.SerializeObjectToElement(object? model, Type modelType, string elementName, XmlDocument document)
+            => SerializeObjectToElement(model, modelType, elementName, document);
+
+        object? IXmlSerializationProvider.DeserializeExpectedTypes(Type baseType, Dictionary<string, Type> expectedDescendingTypes, XmlElement element, XmlDocument document)
+            => DeserializeExpectedTypes(baseType, expectedDescendingTypes, element, document);
+
+        object? IXmlSerializationProvider.DeserializeExpectedType(Type expectedType, string expectedName, XmlElement element, XmlDocument document)
+            => DeserializeExpectedType(expectedType, expectedName, element, document);
+
+        IConverterProvider IXmlSerializationProvider.ConverterProvider => converterProvider;
+
+        IClassInfoProvider IXmlSerializationProvider.ClassInfoProvider => classInfoProvider;
 
         // Public methods -----------------------------------------------------
 
@@ -538,6 +593,7 @@ namespace Spooksoft.Xml.Serialization
                 classInfoProvider = new ClassInfoProvider(new(), new());
 
             converterProvider = new ConverterProvider();
+            collectionSerializerProvider = new CollectionSerializerProvider();
         }
 
         public void Serialize<T>(T model, Stream s)

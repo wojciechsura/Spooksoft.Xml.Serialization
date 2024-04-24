@@ -1,4 +1,5 @@
 using Spooksoft.Xml.Serialization.Test.Models.Simple;
+using Spooksoft.Xml.Serialization.Test.Utils;
 
 namespace Spooksoft.Xml.Serialization.Test
 {
@@ -31,11 +32,7 @@ namespace Spooksoft.Xml.Serialization.Test
 
             // Act
 
-            var ms = new MemoryStream();
-            serializer.Serialize(model, ms);
-
-            ms.Seek(0, SeekOrigin.Begin);
-            var deserialized = serializer.Deserialize<SimpleModel>(ms);
+            var deserialized = Automate.SerializeDeserialize(model, serializer);
 
             // Assert
 
@@ -73,18 +70,7 @@ namespace Spooksoft.Xml.Serialization.Test
 
             // Act
 
-            var ms = new MemoryStream();
-            serializer.Serialize(nested, ms);
-
-            // DEBUG START
-            ms.Seek(0, SeekOrigin.Begin);
-            var reader = new StreamReader(ms);
-            string xml = reader.ReadToEnd();
-            System.Diagnostics.Debug.WriteLine(xml);
-            // DEBUG END
-
-            ms.Seek(0, SeekOrigin.Begin);
-            var deserialized = serializer.Deserialize<NestedModel>(ms);
+            var deserialized = Automate.SerializeDeserialize(nested, serializer);
 
             // Assert
 
@@ -105,11 +91,7 @@ namespace Spooksoft.Xml.Serialization.Test
 
             // Act
 
-            var ms = new MemoryStream();
-            serializer.Serialize(immutable, ms);
-
-            ms.Seek(0, SeekOrigin.Begin);
-            var deserialized = serializer.Deserialize<ImmutableModel>(ms);
+            var deserialized = Automate.SerializeDeserialize(immutable, serializer);
 
             // Assert
 
@@ -136,11 +118,7 @@ namespace Spooksoft.Xml.Serialization.Test
 
             // Act
 
-            var ms = new MemoryStream();
-            serializer.Serialize(list, ms);
-
-            ms.Seek(0, SeekOrigin.Begin);
-            var deserialized = serializer.Deserialize<SimpleListModel>(ms);
+            SimpleListModel? deserialized = Automate.SerializeDeserialize(list, serializer);
 
             // Assert
 
@@ -168,11 +146,7 @@ namespace Spooksoft.Xml.Serialization.Test
 
             // Act
 
-            var ms = new MemoryStream();    
-            serializer.Serialize(list, ms);
-
-            ms.Seek(0, SeekOrigin.Begin);
-            var deserialized = serializer.Deserialize<ImmutableListModel>(ms);
+            var deserialized = Automate.SerializeDeserialize(list, serializer);
 
             // Assert
 

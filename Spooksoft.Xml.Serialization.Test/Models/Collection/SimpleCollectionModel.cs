@@ -5,11 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Spooksoft.Xml.Serialization.Test.Models.Simple
+namespace Spooksoft.Xml.Serialization.Test.Models.Collection
 {
-    public class SimpleListModel
+    public class SimpleCollectionModel
     {
         [XmlArray]
-        public List<SimpleModel>? ListProperty { get; set; }
+        [XmlElement("MyList")]
+        public List<string?>? Strings { get; set; }
     }
 }

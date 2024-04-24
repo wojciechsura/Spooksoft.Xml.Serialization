@@ -36,6 +36,8 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
             var ctors = type.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
             if (ctors.Length > 1)
                 return (null, "There is more than one public constructor in the class");
+            else if (ctors.Length == 0)
+                return (null, "There are no public constructors in the class");
 
             var ctor = ctors[0];
 
@@ -171,47 +173,43 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
                     }
                 }
 
+                if ((matchingCtorParam == null || matchingCtorParamIndex == null) && !property.CanWrite)
+                    throw new XmlModelDefinitionException($"A read-only property {property.Name} of class {type.Name} can be serialized only if it matches a ctor parameter. If not, explicitly mark it with attribute {nameof(XmlIgnoreAttribute)}");
+
                 // Check if property is a collection
+
+                BasePropertyInfo propInfo;
 
                 var xmlArray = property.GetCustomAttribute<XmlArrayAttribute>();
                 if (xmlArray != null)
                 {
+                    // Serialize property as a collection
+                    if (placementAttribute != null && placementAttribute.Placement != XmlPlacement.Element)
+                        throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} is defined as an {nameof(XmlArrayAttribute)}, which means it can be placed only in an element.");
 
+                    Dictionary<string, Type> customTypeMappings = property.GetCustomAttributes<XmlArrayItemAttribute>()
+                        .ToDictionary(a => a.Name, a => a.Type);
+
+                    var collectionProp = new CollectionPropertyInfo(property, placementAttribute, matchingCtorParamIndex, customTypeMappings);
+
+                    if (typeProperties.Exists(tp => tp.MatchesXmlPlacement(collectionProp)))
+                        throw new XmlModelDefinitionException($"Two or more properties in type {type.Name} matches XML placement of {collectionProp.XmlPlacement} and name {collectionProp.XmlName}");
+
+                    propInfo = collectionProp;
                 }
-
-
-                if (matchingCtorParam != null && matchingCtorParamIndex != null)
+                else
                 {
-                    // If the property matches ctor param, it is enough for it
-                    // to be readable. We don't need to check types because 
-                    // it was already done during parametered ctor extraction.
+                    // Serialize property as a class
 
-                    var ctorParamProp = new SimplePropertyInfo(property, placementAttribute, matchingCtorParamIndex.Value);
-
-                    if (typeProperties.Exists(tp => tp.MatchesXmlPlacement(ctorParamProp)))
-                        throw new XmlModelDefinitionException($"Two or more properties in type {type.Name} matches XML placement of {ctorParamProp.XmlPlacement} and name {ctorParamProp.XmlName}");
-
-                    typeProperties.Add(ctorParamProp);
-                    continue;
-                }
-
-                // Treat property as a regular one
-
-                if (property.CanWrite)
-                {
-                    var simpleProp = new SimplePropertyInfo(property, placementAttribute, null);
+                    var simpleProp = new SimplePropertyInfo(property, placementAttribute, matchingCtorParamIndex);
 
                     if (typeProperties.Exists(tp => tp.MatchesXmlPlacement(simpleProp)))
                         throw new XmlModelDefinitionException($"Two or more properties in type {type.Name} matches XML placement of {simpleProp.XmlPlacement} and name {simpleProp.XmlName}");
 
-                    typeProperties.Add(simpleProp);
-                    continue;
+                    propInfo = simpleProp;
                 }
 
-                // Here we have a read-only property, which does not
-                // match any ctor parameters - that's a no-go.
-
-                throw new XmlModelDefinitionException($"A read-only property {property.Name} of class {type.Name} can be serialized only if it matches a ctor parameter. If not, explicitly mark it with attribute {nameof(XmlIgnoreAttribute)}");
+                typeProperties.Add(propInfo);                
             }
 
             BaseClassConstructionInfo ctor = (BaseClassConstructionInfo?)parameterlessCtor ?? parameteredCtor!;

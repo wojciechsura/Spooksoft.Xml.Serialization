@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization
 {
-    internal interface IConverterProvider
+    internal interface ICollectionSerializerProvider
     {
-        IConverter? GetConverter(Type type);
+        ICollectionSerializer? GetCollectionSerializer(Type propertyType);
     }
 }

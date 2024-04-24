@@ -1,4 +1,5 @@
 ﻿using Spooksoft.Xml.Serialization.Test.Models.CustomSerialization;
+using Spooksoft.Xml.Serialization.Test.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,11 +21,7 @@ namespace Spooksoft.Xml.Serialization.Test
 
             // Act
 
-            var ms = new MemoryStream();
-            serializer.Serialize(model, ms);
-
-            ms.Seek(0, SeekOrigin.Begin);
-            var deserialized = serializer.Deserialize<CustomSerializedModel>(ms);
+            var deserialized = Automate.SerializeDeserialize(model, serializer);
 
             // Assert
 

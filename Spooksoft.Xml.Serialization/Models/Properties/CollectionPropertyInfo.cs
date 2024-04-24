@@ -12,10 +12,14 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
     {
         public CollectionPropertyInfo(PropertyInfo property, 
             XmlPlacementAttribute? placementAttribute, 
-            int? constructorParameterIndex) 
+            int? constructorParameterIndex, 
+            Dictionary<string, Type> customTypeMappings) 
             : base(property, placementAttribute, constructorParameterIndex)
         {
-
+            ArgumentNullException.ThrowIfNull(customTypeMappings);
+            CustomTypeMappings = customTypeMappings;
         }
+
+        public Dictionary<string, Type> CustomTypeMappings { get; }
     }
 }

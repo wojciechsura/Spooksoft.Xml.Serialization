@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization
 {
-    internal interface IConverterProvider
+    internal interface IConverter
     {
-        IConverter? GetConverter(Type type);
+        string Serialize(object? value);
+        object? Deserialize(string value);
     }
 }

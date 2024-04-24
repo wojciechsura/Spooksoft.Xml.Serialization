@@ -22,7 +22,7 @@ namespace Spooksoft.Xml.Serialization
     {
         // Private types ------------------------------------------------------
 
-        private class PropertyValue
+        private sealed class PropertyValue
         {
             public PropertyValue(BasePropertyInfo property, object? value)
             {
@@ -37,7 +37,7 @@ namespace Spooksoft.Xml.Serialization
             public object? Value { get; }
         }
 
-        private class ConstructorParameterValue
+        private sealed class ConstructorParameterValue
         {
             public ConstructorParameterValue(BasePropertyInfo property, object? value)
             {
@@ -52,17 +52,29 @@ namespace Spooksoft.Xml.Serialization
             public object? Value { get; }
         }
 
-        private class ClassDeserializationData
+        private sealed class ClassDeserializationData
         {
             public ClassDeserializationData(SerializableClassInfo serializableClassInfo)
             {
                 SerializableClassInfo = serializableClassInfo;
+
+                if (serializableClassInfo.ConstructionInfo is ParameteredCtorConstructionInfo paramederedConstructor)
+                {
+                    ConstructorParameterValues = new ConstructorParameterValue?[paramederedConstructor.ConstructorParameters.Count];
+                }
+                else
+                {
+                    ConstructorParameterValues = Array.Empty<ConstructorParameterValue?>();
+                }
+
+                PropertyValues = new();
+                IsNull = false;
             }
 
             public SerializableClassInfo SerializableClassInfo { get; }
-            public bool IsNull { get; set; } = false;
-            public List<PropertyValue> PropertyValues { get; } = new();
-            public List<ConstructorParameterValue?> ConstructorParameterValues { get; } = new();
+            public bool IsNull { get; set; }
+            public List<PropertyValue> PropertyValues { get; }
+            public ConstructorParameterValue?[] ConstructorParameterValues { get; }
         }
 
         // Private fields -----------------------------------------------------
@@ -239,13 +251,6 @@ namespace Spooksoft.Xml.Serialization
                     }
                 case ParameteredCtorConstructionInfo paramCtor:
                     {
-                        // Ensure that there are enough values
-                        if (deserializationContext.ConstructorParameterValues.Count > paramCtor.ConstructorParameters.Count)
-                            throw new InvalidOperationException("Algorithm error: more constructor parameters deserialized than constructor actually have!");
-
-                        while (deserializationContext.ConstructorParameterValues.Count < paramCtor.ConstructorParameters.Count)
-                            deserializationContext.ConstructorParameterValues.Add(null);
-
                         // Ensure that there are no missing values
                         // Fill those with default values if user wants that
                         for (int i = 0; i < paramCtor.ConstructorParameters.Count; i++)
@@ -336,9 +341,6 @@ namespace Spooksoft.Xml.Serialization
 
                 if (simplePropInfo.ConstructorParameterIndex != null)
                 {
-                    while (data.ConstructorParameterValues.Count <= simplePropInfo.ConstructorParameterIndex.Value)
-                        data.ConstructorParameterValues.Add(null);
-
                     data.ConstructorParameterValues[simplePropInfo.ConstructorParameterIndex.Value] = new ConstructorParameterValue(simplePropInfo, value);
                 }
                 else
@@ -422,9 +424,6 @@ namespace Spooksoft.Xml.Serialization
 
                 if (propInfo.ConstructorParameterIndex != null)
                 {
-                    while (data.ConstructorParameterValues.Count <= propInfo.ConstructorParameterIndex.Value)
-                        data.ConstructorParameterValues.Add(null);
-
                     data.ConstructorParameterValues[propInfo.ConstructorParameterIndex.Value] = new ConstructorParameterValue(propInfo, value);
                 }
                 else

@@ -235,5 +235,33 @@ namespace Spooksoft.Xml.Serialization.Test
             Assert.AreEqual(list.List[0].IntProperty, deserialized.List[0].IntProperty);
             Assert.AreEqual(list.List[1].IntProperty, deserialized.List[1].IntProperty);
         }
+
+        [TestMethod]
+        public void ExtendedTypesSerializationTest()
+        {
+            // Arrange
+
+            var model = new ExtendedTypesModel
+            {
+                DateTime = new DateTime(2001, 1, 1, 13, 15, 56),
+                NullableDateTime = null,
+                Guid = new Guid("701335F5-D66C-4369-A7AA-0F42828EB52E"),
+                NullableGuid = null
+            };
+
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(model, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.AreEqual(model.DateTime, deserialized.DateTime);
+            Assert.AreEqual(model.NullableDateTime, deserialized.NullableDateTime);
+            Assert.AreEqual(model.Guid, deserialized.Guid);
+            Assert.AreEqual(model.NullableGuid, deserialized.NullableGuid);            
+        }
     }
 }

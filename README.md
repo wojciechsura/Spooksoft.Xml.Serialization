@@ -55,7 +55,7 @@ Collections must be marked with `XmlArray` attribute. If you want to support var
 ```csharp
 public class MyModel 
 {
-    [XmlArray("MyCollection")]
+    [XmlArray]
     [XmlArrayItem("ItemType1", typeof(ItemType1))]
     [XmlArrayItem("ItemType2", typeof(ItemType2))]
     public List<BaseItemType> Collection { get; set; }
@@ -113,10 +113,11 @@ public class CustomSerializedModel : IXmlSerializable
 }
 ```
 
-# Known issues
+# Known limitations
 
 * `null` value in a string property serialized to an attribute will be deserialized as an empty string. If you want to keep the null value, serialize it to an element instead (`[XmlElement(...)]`).
 * The only collections supported so far are `List<T>` and `IReadOnlyList<T>`. More will be added in the future.
+* You need to separately define `XmlArray` and `XmlElement` attributes (if you want to specify custom name for array element). You can not store collections inside attribute.
 
 # Development
 

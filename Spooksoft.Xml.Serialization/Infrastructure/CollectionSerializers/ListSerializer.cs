@@ -15,7 +15,7 @@ namespace Spooksoft.Xml.Serialization.Infrastructure.CollectionSerializers
 {
     internal class ListSerializer : ICollectionSerializer
     {
-        private static Dictionary<string, Type> GetMappings(CollectionPropertyInfo propInfo, IConverterProvider converterProvider, IClassInfoProvider classInfoProvider)
+        private static Dictionary<string, Type> GetMappings(CollectionPropertyInfo propInfo, IConverterProvider converterProvider, IClassSerializationInfoProvider classInfoProvider)
         {
             var genericType = propInfo.Property.PropertyType.GetGenericArguments()[0];
 
@@ -44,7 +44,7 @@ namespace Spooksoft.Xml.Serialization.Infrastructure.CollectionSerializers
             return mappings;
         }
 
-        private static Dictionary<Type, string> GetReverseMappings(CollectionPropertyInfo propInfo, IConverterProvider converterProvider, IClassInfoProvider classInfoProvider)
+        private static Dictionary<Type, string> GetReverseMappings(CollectionPropertyInfo propInfo, IConverterProvider converterProvider, IClassSerializationInfoProvider classInfoProvider)
         {
             var mappings = GetMappings(propInfo, converterProvider, classInfoProvider);
 

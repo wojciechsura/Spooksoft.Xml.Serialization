@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization.Models
 {
-    internal class SerializableClassInfo : BaseClassInfo
+    internal class ClassSerializationInfo : BaseClassInfo
     {
-        public SerializableClassInfo(Type type,
+        public ClassSerializationInfo(Type type,
             XmlRootAttribute? rootAttribute,
             BaseClassConstructionInfo construction,
             IReadOnlyList<BasePropertyInfo> properties)

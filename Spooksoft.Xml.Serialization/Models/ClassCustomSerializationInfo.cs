@@ -9,16 +9,16 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization.Models
 {
-    internal class CustomSerializableClassInfo : BaseClassInfo
+    internal class ClassCustomSerializationInfo : BaseClassInfo
     {
-        public CustomSerializableClassInfo(Type type,
+        public ClassCustomSerializationInfo(Type type,
             XmlRootAttribute? rootAttribute, 
-            ParameterlessCtorConstructionInfo constructor) 
+            ParameterlessClassConstructionInfo constructor) 
             : base(type, rootAttribute)
         {
             Constructor = constructor;
         }
 
-        public ParameterlessCtorConstructionInfo Constructor { get; }
+        public ParameterlessClassConstructionInfo Constructor { get; }
     }
 }

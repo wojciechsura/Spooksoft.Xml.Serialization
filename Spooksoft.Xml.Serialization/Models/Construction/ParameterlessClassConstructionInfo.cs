@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization.Models.Construction
 {
-    internal class ParameterlessCtorConstructionInfo : BaseClassConstructionInfo
+    internal class ParameterlessClassConstructionInfo : BaseClassConstructionInfo
     {
     }
 }

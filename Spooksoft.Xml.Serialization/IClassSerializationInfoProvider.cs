@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization
 {
-    internal interface IClassInfoProvider
+    internal interface IClassSerializationInfoProvider
     {
         BaseClassInfo GetClassInfo(Type type);
     }        

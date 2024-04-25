@@ -2,7 +2,7 @@
 
 namespace Spooksoft.Xml.Serialization.Infrastructure
 {
-    internal class ClassInfoProvider : IClassInfoProvider
+    internal class ClassInfoProvider : IClassSerializationInfoProvider
     {
         private readonly Dictionary<Type, BaseClassInfo> typeCache;
         private readonly object typeCacheLock;

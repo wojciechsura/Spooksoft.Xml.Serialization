@@ -15,14 +15,14 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
 {
     internal static class ClassInfoBuilder
     {
-        private static ParameterlessCtorConstructionInfo? GetParameterlessCtor(Type type)
+        private static ParameterlessClassConstructionInfo? GetParameterlessCtor(Type type)
         {
             // Parameterless constructor
             var ctor = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public, Array.Empty<Type>());
 
             if (ctor != null)
             {
-                return new ParameterlessCtorConstructionInfo();
+                return new ParameterlessClassConstructionInfo();
             }
             else
             {
@@ -30,7 +30,7 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
             }
         }
 
-        private static (ParameteredCtorConstructionInfo? ctor, string? error) GetParameteredCtor(Type type)
+        private static (ParameteredClassConstructionInfo? ctor, string? error) GetParameteredCtor(Type type)
         {
             // Parametered ctor must be the only ctor in the type
             var ctors = type.GetConstructors(BindingFlags.Instance | BindingFlags.Public);
@@ -95,14 +95,14 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
                 constructorParameters.Add(new ConstructorParameterInfo(matchingProp, placementAttribute));
             }
 
-            return (new ParameteredCtorConstructionInfo(ctor, constructorParameters), null);
+            return (new ParameteredClassConstructionInfo(ctor, constructorParameters), null);
         }
 
         public static BaseClassInfo BuildClassInfo(Type type)
         {
             // 1. Gather some information about the type
 
-            ParameterlessCtorConstructionInfo? parameterlessCtor = GetParameterlessCtor(type);
+            ParameterlessClassConstructionInfo? parameterlessCtor = GetParameterlessCtor(type);
 
             XmlRootAttribute? xmlRoot = type.GetCustomAttribute<XmlRootAttribute>();
 
@@ -111,12 +111,12 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
 
             if (type.IsAssignableTo(typeof(IXmlSerializable)) && parameterlessCtor != null)
             {
-                return new CustomSerializableClassInfo(type, xmlRoot, parameterlessCtor);
+                return new ClassCustomSerializationInfo(type, xmlRoot, parameterlessCtor);
             }
 
             // 3. If there is no parameterless ctor, search for parametered one
 
-            ParameteredCtorConstructionInfo? parameteredCtor = null;
+            ParameteredClassConstructionInfo? parameteredCtor = null;
             string? parameteredCtorError = null;
             if (parameterlessCtor == null)
                 (parameteredCtor, parameteredCtorError) = GetParameteredCtor(type);
@@ -214,7 +214,7 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
 
             BaseClassConstructionInfo ctor = (BaseClassConstructionInfo?)parameterlessCtor ?? parameteredCtor!;
 
-            return new SerializableClassInfo(type,
+            return new ClassSerializationInfo(type,
                 xmlRoot,
                 ctor,
                 typeProperties);

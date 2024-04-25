@@ -10,7 +10,7 @@ namespace Spooksoft.Xml.Serialization
     {
         public bool UseSharedTypeCache { get; set; } = false;
         public bool ErrorOnNotRecognizedProperties { get; set; } = true;
-        public bool ErrorOnFailedAttributeDeserialization { get; set; } = true;
+        public bool ErrorOnFailedPropertyDeserialization { get; set; } = true;
         public bool ReplaceMissingCtorParamsWithDefaultValues { get; set; } = false;
     }
 }

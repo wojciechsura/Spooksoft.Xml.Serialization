@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization.Models.Construction
 {
-    internal class ParameteredCtorConstructionInfo : BaseClassConstructionInfo
+    internal class ParameteredClassConstructionInfo : BaseClassConstructionInfo
     {
-        public ParameteredCtorConstructionInfo(ConstructorInfo constructor, IReadOnlyList<ConstructorParameterInfo> constructorParameters)
+        public ParameteredClassConstructionInfo(ConstructorInfo constructor, 
+            IReadOnlyList<ConstructorParameterInfo> constructorParameters)
         {
             Constructor = constructor;
             ConstructorParameters = constructorParameters;

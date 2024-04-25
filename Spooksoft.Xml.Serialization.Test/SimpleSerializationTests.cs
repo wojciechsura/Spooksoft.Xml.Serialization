@@ -129,8 +129,6 @@ namespace Spooksoft.Xml.Serialization.Test
             Assert.IsNull(deserialized.DecimalProperty);
         }
 
-
-
         [TestMethod]
         public void NestedSerializationTest() 
         {
@@ -262,6 +260,23 @@ namespace Spooksoft.Xml.Serialization.Test
             Assert.AreEqual(model.NullableDateTime, deserialized.NullableDateTime);
             Assert.AreEqual(model.Guid, deserialized.Guid);
             Assert.AreEqual(model.NullableGuid, deserialized.NullableGuid);            
+        }
+
+        [TestMethod]
+        public void NullRootSerializationTest()
+        {
+            // Arrange
+
+            SimpleModel? model = null;
+            XmlSerializer serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize<SimpleModel>(model, serializer);
+
+            // Assert
+
+            Assert.IsNull(deserialized);
         }
     }
 }

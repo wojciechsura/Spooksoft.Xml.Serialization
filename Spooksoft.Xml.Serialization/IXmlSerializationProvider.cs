@@ -10,7 +10,7 @@ namespace Spooksoft.Xml.Serialization
     internal interface IXmlSerializationProvider
     {
         IConverterProvider ConverterProvider { get; }
-        IClassInfoProvider ClassInfoProvider { get; }
+        IClassSerializationInfoProvider ClassInfoProvider { get; }
 
         object? DeserializeExpectedType(Type expectedType, string elementName, XmlElement element, XmlDocument document);
         object? DeserializeExpectedTypes(Type baseType, Dictionary<string, Type> expectedDescendingTypes, XmlElement element, XmlDocument document);

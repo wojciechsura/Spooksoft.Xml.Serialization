@@ -10,8 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -567,33 +565,30 @@ namespace Spooksoft.Xml.Serialization
                 if (!kvp.Value.IsAssignableTo(baseType))
                     throw new InvalidOperationException($"Type {kvp.Value.Name} is not assignable to {baseType.Name}!");
 
-            // Start processing XML
+            // Find matching type
 
             if (!expectedDescendingTypes.TryGetValue(element.Name, out Type? type) || type == null)
                 throw new XmlSerializationException($"Node name {element.Name} does not match any of given types!");
+
+            // Deserialize from XML
 
             object? result = DeserializeType(type, element, document);
 
             return result;
         }
 
-        private object? DeserializeExpectedType(Type expectedType, string expectedName, XmlElement element, XmlDocument document)
-        {
-            ArgumentNullException.ThrowIfNull(expectedType);
-            ArgumentNullException.ThrowIfNull(element);
-
-            if (!expectedType.IsClass)
-                throw new InvalidOperationException("Type passed to DeserializeExpectedType must be a class!");
-
-            return DeserializeExpectedTypes(expectedType, new Dictionary<string, Type> { { expectedName, expectedType } }, element, document);
-        }
+        private object? DeserializeExpectedType(Type expectedType, string expectedName, XmlElement element, XmlDocument document) => 
+            DeserializeExpectedTypes(expectedType,
+                new Dictionary<string, Type> { { expectedName, expectedType } },
+                element,
+                document);
 
         private object? Deserialize(Type type, XmlDocument document)
         {
-            if (document.ChildNodes.Count == 0)
+            if (document.ChildNodes.OfType<XmlElement>().Count() == 0)
                 throw new XmlSerializationException("Empty document, cannot deserialize");
 
-            var rootNode = (XmlElement)document.ChildNodes[0]!;
+            var rootNode = document.ChildNodes.OfType<XmlElement>().First();
             return DeserializeType(type, rootNode, document);
         }
 

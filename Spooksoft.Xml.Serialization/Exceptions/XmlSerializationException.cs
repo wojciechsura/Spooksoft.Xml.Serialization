@@ -12,8 +12,5 @@ namespace Spooksoft.Xml.Serialization.Exceptions
         public XmlSerializationException() { }
         public XmlSerializationException(string message) : base(message) { }
         public XmlSerializationException(string message, Exception inner) : base(message, inner) { }
-        protected XmlSerializationException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 }

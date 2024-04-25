@@ -10,6 +10,9 @@
     <RepositoryUrl>https://github.com/wojciechsura/Spooksoft.Xml.Serialization</RepositoryUrl>
     <PackageReleaseNotes>First public release</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Authors>spook</Authors>
+    <Company>Spooksoft</Company>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0|AnyCPU'">

@@ -180,53 +180,69 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
 
                 BasePropertyInfo propInfo;
 
-                var xmlArray = property.GetCustomAttribute<XmlArrayAttribute>();
-                if (xmlArray != null)
+                var xmlBinary = property.GetCustomAttribute<XmlBinaryAttribute>();
+                if (xmlBinary != null)
                 {
+                    if (property.PropertyType != typeof(byte[]))
+                        throw new XmlModelDefinitionException($"An {nameof(XmlBinaryAttribute)} attribute can be attached only to a property of type byte[]");
+
                     // Serialize property as a collection
                     if (placementAttribute != null && placementAttribute.Placement != XmlPlacement.Element)
-                        throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} is defined as an {nameof(XmlArrayAttribute)}, which means it can be placed only in an element.");
+                        throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} is defined as an {nameof(XmlBinaryAttribute)}, which means it can be placed only in an element.");
 
-                    Dictionary<string, Type> customTypeMappings = property.GetCustomAttributes<XmlArrayItemAttribute>()
-                        .ToDictionary(a => a.Name, a => a.Type);
-
-                    var collectionProp = new CollectionPropertyInfo(property, placementAttribute, matchingCtorParamIndex, customTypeMappings);
-
-                    if (typeProperties.Exists(tp => tp.MatchesXmlPlacement(collectionProp)))
-                        throw new XmlModelDefinitionException($"Two or more properties in type {type.Name} matches XML placement of {collectionProp.XmlPlacement} and name {collectionProp.XmlName}");
-
-                    propInfo = collectionProp;
+                    var binaryProp = new BinaryPropertyInfo(property, placementAttribute, matchingCtorParamIndex);
+                    propInfo = binaryProp;
                 }
                 else
                 {
-                    var xmlMap = property.GetCustomAttribute<XmlMapAttribute>();
-                    if (xmlMap != null)
+                    var xmlArray = property.GetCustomAttribute<XmlArrayAttribute>();
+                    if (xmlArray != null)
                     {
+                        // Serialize property as a collection
                         if (placementAttribute != null && placementAttribute.Placement != XmlPlacement.Element)
-                            throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} is defined as an {nameof(XmlMapAttribute)}, which means it can be placed only in an element.");
+                            throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} is defined as an {nameof(XmlArrayAttribute)}, which means it can be placed only in an element.");
 
-                        Dictionary<string, Type> customKeyTypeMappings = property.GetCustomAttributes<XmlMapKeyAttribute>()
-                            .ToDictionary(a => a.Name, a => a.Type);
-                        Dictionary<string, Type> customValueTypeMappings = property.GetCustomAttributes<XmlMapValueAttribute>()
+                        Dictionary<string, Type> customTypeMappings = property.GetCustomAttributes<XmlArrayItemAttribute>()
                             .ToDictionary(a => a.Name, a => a.Type);
 
-                        var mapProp = new MapPropertyInfo(property, placementAttribute, matchingCtorParamIndex, customKeyTypeMappings, customValueTypeMappings);
+                        var collectionProp = new CollectionPropertyInfo(property, placementAttribute, matchingCtorParamIndex, customTypeMappings);
 
-                        if (typeProperties.Exists(tp => tp.MatchesXmlPlacement(mapProp)))
-                            throw new XmlModelDefinitionException($"Two or more properties in type {type.Name} matches XML placement of {mapProp.XmlPlacement} and name {mapProp.XmlName}");
+                        if (typeProperties.Exists(tp => tp.MatchesXmlPlacement(collectionProp)))
+                            throw new XmlModelDefinitionException($"Two or more properties in type {type.Name} matches XML placement of {collectionProp.XmlPlacement} and name {collectionProp.XmlName}");
 
-                        propInfo = mapProp;
+                        propInfo = collectionProp;
                     }
                     else
                     {
-                        // Serialize property as a class
+                        var xmlMap = property.GetCustomAttribute<XmlMapAttribute>();
+                        if (xmlMap != null)
+                        {
+                            if (placementAttribute != null && placementAttribute.Placement != XmlPlacement.Element)
+                                throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} is defined as an {nameof(XmlMapAttribute)}, which means it can be placed only in an element.");
 
-                        var simpleProp = new SimplePropertyInfo(property, placementAttribute, matchingCtorParamIndex);
+                            Dictionary<string, Type> customKeyTypeMappings = property.GetCustomAttributes<XmlMapKeyAttribute>()
+                                .ToDictionary(a => a.Name, a => a.Type);
+                            Dictionary<string, Type> customValueTypeMappings = property.GetCustomAttributes<XmlMapValueAttribute>()
+                                .ToDictionary(a => a.Name, a => a.Type);
 
-                        if (typeProperties.Exists(tp => tp.MatchesXmlPlacement(simpleProp)))
-                            throw new XmlModelDefinitionException($"Two or more properties in type {type.Name} matches XML placement of {simpleProp.XmlPlacement} and name {simpleProp.XmlName}");
+                            var mapProp = new MapPropertyInfo(property, placementAttribute, matchingCtorParamIndex, customKeyTypeMappings, customValueTypeMappings);
 
-                        propInfo = simpleProp;
+                            if (typeProperties.Exists(tp => tp.MatchesXmlPlacement(mapProp)))
+                                throw new XmlModelDefinitionException($"Two or more properties in type {type.Name} matches XML placement of {mapProp.XmlPlacement} and name {mapProp.XmlName}");
+
+                            propInfo = mapProp;
+                        }
+                        else
+                        {
+                            // Serialize property as a class
+
+                            var simpleProp = new SimplePropertyInfo(property, placementAttribute, matchingCtorParamIndex);
+
+                            if (typeProperties.Exists(tp => tp.MatchesXmlPlacement(simpleProp)))
+                                throw new XmlModelDefinitionException($"Two or more properties in type {type.Name} matches XML placement of {simpleProp.XmlPlacement} and name {simpleProp.XmlName}");
+
+                            propInfo = simpleProp;
+                        }
                     }
                 }
 

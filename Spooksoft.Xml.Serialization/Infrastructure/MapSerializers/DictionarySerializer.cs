@@ -155,6 +155,7 @@ namespace Spooksoft.Xml.Serialization.Infrastructure.MapSerializers
                     if (pairItemValue == null)
                     {
                         var propertyDataElement = document.CreateElement(pairItemDataElementName);
+                        pairItemElement.AppendChild(propertyDataElement);
                         propertyDataElement.SetAttribute(Constants.NIL_ATTRIBUTE, Constants.CONTROL_NAMESPACE_URI, "true");
                     }
                     else
@@ -168,7 +169,7 @@ namespace Spooksoft.Xml.Serialization.Infrastructure.MapSerializers
                         }
                         else
                         {
-                            var serializedDataElement = provider.SerializeObjectToElement(pairItemValue, pairItemPropertyType, keyName, document);
+                            var serializedDataElement = provider.SerializeObjectToElement(pairItemValue, pairItemPropertyType, pairItemDataElementName, document);
                             pairItemElement.AppendChild(serializedDataElement);
                         }
                     }

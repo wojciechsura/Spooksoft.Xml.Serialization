@@ -150,6 +150,30 @@ namespace Spooksoft.Xml.Serialization
                     classElement.AppendChild(propertyElement);
                 }
             }
+            else if (property is BinaryPropertyInfo binaryProp)
+            {
+                // Get property type
+                var propertyType = binaryProp.Property.PropertyType;
+
+                if (propertyType != typeof(byte[]))
+                    throw new XmlModelDefinitionException($"An {nameof(XmlBinaryAttribute)} attribute can be attached only to a property of type byte[]");
+
+                // Get property value
+
+                var value = (byte[]?)binaryProp.Property.GetValue(model);
+
+                var propertyElement = document.CreateElement(binaryProp.XmlName);
+                classElement.AppendChild(propertyElement);
+
+                if (value == null)
+                {
+                    propertyElement.SetAttribute(Constants.NIL_ATTRIBUTE, Constants.CONTROL_NAMESPACE_URI, "true");
+                }
+                else
+                {
+                    propertyElement.InnerText = Convert.ToBase64String(value);
+                }
+            }
             else if (property is CollectionPropertyInfo collectionProp)
             {
                 // Get property type
@@ -159,7 +183,7 @@ namespace Spooksoft.Xml.Serialization
                 var value = collectionProp.Property.GetValue(model);
 
                 // Get collection serializer
-                var serializer = collectionSerializerProvider.GetCollectionSerializer(propertyType) ?? 
+                var serializer = collectionSerializerProvider.GetCollectionSerializer(propertyType) ??
                     throw new XmlSerializationException($"Cannot serialize property {collectionProp.Property.Name} of class {model.GetType().Name}. No suitable collection serializer found for type {propertyType.Name}");
 
                 // Serialize
@@ -453,6 +477,32 @@ namespace Spooksoft.Xml.Serialization
                         value = DeserializeExpectedType(propertyType, child.Name, child, document);
                     }
                 }
+                else if (propInfo is BinaryPropertyInfo binaryProp)
+                {
+                    // Check for null
+                    var nullAttribute = subElement.Attributes
+                        .OfType<XmlAttribute>()
+                        .FirstOrDefault(a => a.LocalName == Constants.NIL_ATTRIBUTE && a.NamespaceURI == Constants.CONTROL_NAMESPACE_URI);
+
+                    if (nullAttribute != null && nullAttribute.Value.ToLower() == "true")
+                    {
+                        value = null;
+                    }
+                    else
+                    {
+                        if (subElement.ChildNodes.OfType<XmlNode>().Any(cn => cn is not XmlText))
+                            throw new XmlSerializationException($"Element representing a binary node cannot contain any other sub-elements than text! Property {propInfo.Property.Name} of class {data.ClassSerializationInfo.Type.Name}");
+
+                        if (string.IsNullOrEmpty(subElement.InnerText))
+                        {
+                            value = Array.Empty<byte>();
+                        }
+                        else
+                        {
+                            value = Convert.FromBase64String(subElement.InnerText);
+                        }
+                    }
+                }
                 else if (propInfo is CollectionPropertyInfo collectionProp)
                 {
                     // Try to get a serializer for collection
@@ -498,7 +548,7 @@ namespace Spooksoft.Xml.Serialization
             if (attribute != null && attribute.Value.ToLower() == "true")
             {
                 data.IsNull = true;
-            }
+            }            
         }
 
         private object? DeserializeClass(Type type, XmlElement element, ClassSerializationInfo serializableClassInfo, XmlDocument document)

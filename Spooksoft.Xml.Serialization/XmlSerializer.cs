@@ -84,7 +84,7 @@ namespace Spooksoft.Xml.Serialization
         private readonly IClassSerializationInfoProvider classSerializationInfoProvider;
         private readonly IConverterProvider converterProvider;
         private readonly ICollectionSerializerProvider collectionSerializerProvider;
-
+        private readonly MapSerializerProvider mapSerializerProvider;
         private readonly XmlSerializerConfig config;
 
         // Private methods ----------------------------------------------------
@@ -165,6 +165,23 @@ namespace Spooksoft.Xml.Serialization
                 // Serialize
                 var propertyElement = document.CreateElement(collectionProp.XmlName);
                 serializer.Serialize(value, model.GetType(), collectionProp, propertyElement, document, this);
+                classElement.AppendChild(propertyElement);
+            }
+            else if (property is MapPropertyInfo mapProp)
+            {
+                // Get property type
+                var propertyType = mapProp.Property.PropertyType;
+
+                // Get property value
+                var value = mapProp.Property.GetValue(model);
+
+                // Get map serializer
+                var serializer = mapSerializerProvider.GetMapSerializer(propertyType) ??
+                    throw new XmlSerializationException($"Cannot serialize property {mapProp.Property.Name} of class {model.GetType().Name}. No suitable collection serializer found for type {propertyType.Name}");
+
+                // Serialize
+                var propertyElement = document.CreateElement(mapProp.XmlName);
+                serializer.Serialize(value, model.GetType(), mapProp, propertyElement, document, this);
                 classElement.AppendChild(propertyElement);
             }
             else
@@ -248,7 +265,7 @@ namespace Spooksoft.Xml.Serialization
             ArgumentNullException.ThrowIfNull(modelType);
             ArgumentNullException.ThrowIfNull(document);
 
-            var element = SerializeObjectToElement(model, modelType, document);
+            var element = SerializeObjectToElement(model, modelType, document, true);
             
             document.AppendChild(element);
         }
@@ -447,6 +464,17 @@ namespace Spooksoft.Xml.Serialization
 
                     value = serializer.Deserialize(data.ClassSerializationInfo.Type, collectionProp, subElement, document, this);
                 }
+                else if (propInfo is MapPropertyInfo mapProp)
+                {
+                    // Try to get a serializer for map
+
+                    var serializer = mapSerializerProvider.GetMapSerializer(mapProp.Property.PropertyType) ??
+                        throw new XmlSerializationException($"Cannot deserialize property {mapProp.Property.Name} of class {data.ClassSerializationInfo.Type.Name}. No suitable map serializer found for type {mapProp.Property.PropertyType.Name}");
+
+                    // Deserialize map using found serializer
+
+                    value = serializer.Deserialize(data.ClassSerializationInfo.Type, mapProp, subElement, document, this);
+                }
                 else
                     throw new InvalidOperationException("Unsupported property info!");
 
@@ -620,6 +648,7 @@ namespace Spooksoft.Xml.Serialization
 
             converterProvider = new ConverterProvider();
             collectionSerializerProvider = new CollectionSerializerProvider();
+            mapSerializerProvider = new MapSerializerProvider();
         }
 
         public void Serialize<T>(T? model, Stream s)

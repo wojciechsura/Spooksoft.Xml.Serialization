@@ -57,7 +57,6 @@ namespace Spooksoft.Xml.Serialization.Infrastructure.CollectionSerializers
 
                 if (nullAttribute != null && nullAttribute.Value.ToLower() == "true")
                 {
-
                     addItem(result, null);
                     continue;
                 }

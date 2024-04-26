@@ -278,5 +278,32 @@ namespace Spooksoft.Xml.Serialization.Test
 
             Assert.IsNull(deserialized);
         }
+
+        /// <remarks>
+        /// That's a known limitation to be solved some day (perhaps)
+        /// If you want to store null strings, store them in elements
+        /// instead
+        /// </remarks>
+        [TestMethod]
+        public void NullStringInAttributeSerializeTest()
+        {
+            // Arrange
+
+            var model = new StringPropModel
+            {                
+                StringProperty = null,                
+            };
+
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(model, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.AreEqual(String.Empty, deserialized.StringProperty);
+        }
     }
 }

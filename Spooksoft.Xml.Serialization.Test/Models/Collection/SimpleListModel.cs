@@ -7,11 +7,10 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization.Test.Models.Collection
 {
-    public class CollectionModel
+    public class SimpleListModel
     {
         [XmlArray]
-        [XmlArrayItem("ItemA", typeof(ListItemA))]
-        [XmlArrayItem("ItemB", typeof(ListItemB))]
-        public List<BaseListItem>? List { get; set; }
+        [XmlElement("MyList")]
+        public List<string?>? Strings { get; set; }
     }
 }

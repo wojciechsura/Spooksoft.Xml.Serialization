@@ -16,7 +16,7 @@ namespace Spooksoft.Xml.Serialization.Test
         {
             // Arrange
 
-            var list = new CollectionModel
+            var list = new ReferenceListModel
             {
                 List = new List<BaseListItem>
                 {
@@ -60,7 +60,7 @@ namespace Spooksoft.Xml.Serialization.Test
         {
             // Arrange
 
-            var simpleCollection = new SimpleCollectionModel
+            var simpleCollection = new SimpleListModel
             {
                 Strings = new List<string?> { "One", "Two" }
             };
@@ -85,7 +85,7 @@ namespace Spooksoft.Xml.Serialization.Test
         {
             // Arrange
 
-            var simpleCollection = new SimpleCollectionModel
+            var simpleCollection = new SimpleListModel
             {
                 Strings = null
             };
@@ -107,7 +107,7 @@ namespace Spooksoft.Xml.Serialization.Test
         {
             // Arrange
 
-            var simpleCollection = new SimpleCollectionModel
+            var simpleCollection = new SimpleListModel
             {
                 Strings = new()
             };
@@ -130,7 +130,7 @@ namespace Spooksoft.Xml.Serialization.Test
         {
             // Arrange
 
-            var simpleCollection = new SimpleCollectionModel
+            var simpleCollection = new SimpleListModel
             {
                 Strings = new() { null, null }
             };
@@ -148,6 +148,85 @@ namespace Spooksoft.Xml.Serialization.Test
             Assert.AreEqual(2, deserialized.Strings.Count);
             Assert.IsNull(deserialized.Strings[0]);
             Assert.IsNull(deserialized.Strings[1]);
+        }
+
+        [TestMethod]
+        public void NullArraySerializationTest()
+        {
+            // Arrange
+
+            var model = new SimpleArrayModel();
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(model, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.IsNull(deserialized.ArrayProp);
+        }
+
+        [TestMethod]
+        public void SimpleArraySerializationTest()
+        {
+            // Arrange
+
+            var model = new SimpleArrayModel()
+            {
+                ArrayProp = new int[] { 3, 12 }
+            };
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(model, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.IsNotNull(deserialized.ArrayProp);
+            Assert.AreEqual(2, deserialized.ArrayProp.Length);
+            Assert.AreEqual(3, deserialized.ArrayProp[0]);
+            Assert.AreEqual(12, deserialized.ArrayProp[1]);
+        }
+
+        [TestMethod]
+        public void ReferenceArraySerializationTest()
+        {
+            // Arrange
+
+            var model = new ReferenceArrayModel()
+            {
+                ArrayProp = new BaseListItem?[]
+                { 
+                    new ListItemA { IntProperty = 1 },
+                    null,
+                    new ListItemB { IntProperty = 2 }
+                }
+            };
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(model, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.IsNotNull(deserialized.ArrayProp);
+            Assert.AreEqual(3, deserialized.ArrayProp.Length);
+            
+            Assert.IsNotNull(deserialized.ArrayProp[0]);
+            Assert.IsInstanceOfType(deserialized.ArrayProp[0], typeof(ListItemA));
+            Assert.AreEqual(1, ((ListItemA)deserialized.ArrayProp[0]!).IntProperty);
+
+            Assert.IsNull(deserialized.ArrayProp[1]);
+
+            Assert.IsNotNull(deserialized.ArrayProp[2]);
+            Assert.IsInstanceOfType(deserialized.ArrayProp[2], typeof(ListItemB));
+            Assert.AreEqual(2, ((ListItemB)deserialized.ArrayProp[2]!).IntProperty);
         }
     }
 }

@@ -17,6 +17,14 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
 
         public ICollectionSerializer? GetCollectionSerializer(Type propertyType)
         {
+            if (propertyType.IsArray)
+            {
+                if (propertyType.GetArrayRank() == 1)
+                    return new SingleDimensionalArraySerializer();
+                else
+                    throw new NotImplementedException("Support for multi-dimensional arrays is not implemented");
+            }
+
             if (propertyType.IsGenericType)
             {
                 if (collectionSerializers.TryGetValue(propertyType.GetGenericTypeDefinition(), out var serializer))

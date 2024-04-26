@@ -110,7 +110,7 @@ namespace Spooksoft.Xml.Serialization
                     { typeof(double?), new NullableLambdaConverter(d => d == null ? "null" : d.ToString()!, s => s.ToLower() == "null" ? (double?)null : double.Parse(s)) },
                     { typeof(decimal), new NonNullLambdaConverter(de => de!.ToString()!, s => decimal.Parse(s)) },
                     { typeof(decimal?), new NullableLambdaConverter(d => d == null ? "null" : d.ToString()!, s => s.ToLower() == "null" ? (decimal?)null : decimal.Parse(s)) },
-                    { typeof(string), new NonNullLambdaConverter(s => ((string?)s) ?? string.Empty, s => s ?? string.Empty) },
+                    { typeof(string), new NullableLambdaConverter(s => ((string?)s) ?? string.Empty, s => s ?? string.Empty) },
                     { typeof(bool), new NonNullLambdaConverter(b => b.ToString()!, s => bool.Parse(s)) },
                     { typeof(bool?), new NullableLambdaConverter(b => b == null ? "null" : b.ToString()!, s => s.ToLower() == "null" ? (bool?)null : bool.Parse(s)) },
                     { typeof(DateTime), new NonNullLambdaConverter(d => ((DateTime)d).ToString("yyyy-MM-dd'T'HH:mm:ss.fffffff"), s => DateTime.ParseExact(s, "yyyy-MM-dd'T'HH:mm:ss.fffffff", CultureInfo.InvariantCulture)) },

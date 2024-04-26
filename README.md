@@ -52,6 +52,12 @@ public class MyImmutableModel
 
 Collections must be marked with `XmlArray` attribute. If you want to support various types in the collection, add `XmlArrayItem` attributes.
 
+So far the following collections are supported:
+
+* `List<T>`
+* `IReadOnlyList<T>` (filled during deserialization with `List<T>`)
+* `T[]` (for now, only single-dimensional arrays are supported)
+
 ```csharp
 public class MyModel 
 {
@@ -59,6 +65,45 @@ public class MyModel
     [XmlArrayItem("ItemType1", typeof(ItemType1))]
     [XmlArrayItem("ItemType2", typeof(ItemType2))]
     public List<BaseItemType> Collection { get; set; }
+
+    [XmlArray]
+    public int[] MyArray { get; set; }
+}
+```
+
+# Maps
+
+Map properties (e.g. `Dictionary<,>`) must be marked with `XmlMapAttribute` attribute. If you want to support various types for either keys or values, add one or more `XmlMapKeyAttribute` or `XmlMapValueAttribute` attributes to the property.
+
+So far the following maps are supported:
+
+* `Dictionary<TKey,TValue>`
+
+```csharp
+public class MyModel
+{
+    [XmlMap]
+    [XmlMapKey("Base", typeof(BaseKey))]
+    [XmlMapKey("Derived", typeof(DerivedKey))]
+    [XmlMapValue("Base", typeof(BaseValue))]
+    [XmlMapValue("Derived", typeof(DerivedValue))]
+    public Dictionary<BaseKey, BaseValue> Dictionary { get; set; }
+}
+```
+
+# Binary
+
+To serialize binary data, use `XmlBinaryAttribute` attribute. Data will be serialized in the Base64 format.
+
+So far the following types of properties can be treated as binary:
+
+* `byte[]`
+
+```csharp
+public class MyModel
+{
+    [XmlBinary]
+    public byte[] SomeData { get; set; }
 }
 ```
 
@@ -116,9 +161,8 @@ public class CustomSerializedModel : IXmlSerializable
 # Known limitations
 
 * `null` value in a string property serialized to an attribute will be deserialized as an empty string. If you want to keep the null value, serialize it to an element instead (`[XmlElement(...)]`).
-* The only collections supported so far are `List<T>` and `IReadOnlyList<T>`. More will be added in the future.
-* You need to separately define `XmlArray` and `XmlElement` attributes (if you want to specify custom name for array element). You can not store collections inside attribute.
+* You need to separately define `XmlArray` and `XmlElement` attributes (if you want to specify custom name for array element). You can not store collections inside attribute. The same applies to maps and binary data.
 
 # Development
 
-Pull requests (e.g. bugfixes, implementation of more collection types) are welcome.
+Pull requests (e.g. bugfixes, implementation of more collection types) are mostly welcome.

@@ -48,6 +48,20 @@ public class MyImmutableModel
 }
 ```
 
+# Varying-type properties
+
+If a property is of reference type and can contain an instance of derived type, my serializer will handle that, but you must explicitly specify all possible variants.
+
+```csharp
+public class MyClass
+{
+    [XmlVariant("Base", typeof(BaseType))]
+    [XmlVariant("Derived1", typeof(DerivedType1))]
+    [XmlVariant("Derived2", typeof(DerivedType2))]
+    public BaseType Prop { get; set; }
+}
+```
+
 # Collections
 
 Collections must be marked with `XmlArray` attribute. If you want to support various types in the collection, add `XmlArrayItem` attributes.
@@ -161,7 +175,7 @@ public class CustomSerializedModel : IXmlSerializable
 # Known limitations
 
 * `null` value in a string property serialized to an attribute will be deserialized as an empty string. If you want to keep the null value, serialize it to an element instead (`[XmlElement(...)]`).
-* You need to separately define `XmlArray` and `XmlElement` attributes (if you want to specify custom name for array element). You can not store collections inside attribute. The same applies to maps and binary data.
+* You need to separately define `XmlArray` and `XmlElement` attributes (if you want to specify custom name for array element). You can not store collections inside an attribute. The same applies to maps and binary data.
 
 # Development
 

@@ -14,12 +14,10 @@ using System.Xml;
 
 namespace Spooksoft.Xml.Serialization.Infrastructure.MapSerializers
 {
-    internal class DictionarySerializer : BaseMapSerializer, IMapSerializer
+    internal class DictionarySerializer : IMapSerializer
     {
         public object? Deserialize(Type modelType, MapPropertyInfo propInfo, XmlElement propertyElement, XmlDocument document, IXmlSerializationProvider provider)
         {
-            (var keyType, var valueType, var keyMappings, var valueMappings) = GetMappings(propInfo, provider.ConverterProvider, provider.ClassInfoProvider);
-
             var mapNullAttribute = propertyElement.Attributes
                 .OfType<XmlAttribute>()
                 .FirstOrDefault(a => a.NamespaceURI == Constants.CONTROL_NAMESPACE_URI && a.LocalName == Constants.NIL_ATTRIBUTE);
@@ -31,7 +29,7 @@ namespace Spooksoft.Xml.Serialization.Infrastructure.MapSerializers
 
             // Map
 
-            Type resultType = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
+            Type resultType = typeof(Dictionary<,>).MakeGenericType(propInfo.KeyType, propInfo.ValueType);
             var resultAddMethod = resultType.GetMethod("Add")!;
 
             var result = Activator.CreateInstance(resultType);
@@ -58,36 +56,8 @@ namespace Spooksoft.Xml.Serialization.Infrastructure.MapSerializers
                 if (valueDataNode == null)
                     throw new XmlSerializationException($"Map item's Value element is missing its child element! Property {propInfo.Property.Name} of type {modelType.Name}");
 
-                object? GetValue(Dictionary<string, Type> pairItemMappings, XmlElement pairItemDataNode, string pairItemName, Type attribute)
-                {
-                    if (!pairItemMappings.TryGetValue(pairItemDataNode.Name, out var pairItemType))
-                        throw new XmlSerializationException($"Not recognized XML {pairItemName} item (with name {pairItemDataNode.Name}). Add missing {attribute.Name} to the to the property {propInfo.XmlName} of class {modelType.Name}.");
-
-                    var nullAttribute = pairItemDataNode.Attributes
-                        .OfType<XmlAttribute>()
-                        .FirstOrDefault(a => a.LocalName == Constants.NIL_ATTRIBUTE && a.NamespaceURI == Constants.CONTROL_NAMESPACE_URI);
-
-                    if (nullAttribute != null && nullAttribute.Value.ToLower() == "true")
-                    {
-                        return null;
-                    }
-
-                    var converter = provider.ConverterProvider.GetConverter(pairItemType);
-                    if (converter != null)
-                    {
-                        if (pairItemDataNode.ChildNodes.OfType<XmlNode>().Any(cn => cn is not XmlText))
-                            throw new XmlSerializationException($"Type convertible to string must be stored as the only text of item node.");
-
-                        object? item = converter.Deserialize(pairItemDataNode.InnerText);
-                        return item;
-                    }
-
-                    object? deserializedItem = provider.DeserializeExpectedType(pairItemType, pairItemDataNode.Name, pairItemDataNode, document);
-                    return deserializedItem;
-                }
-
-                var key = GetValue(keyMappings, keyDataNode, "key", typeof(XmlMapKeyAttribute));
-                var value = GetValue(valueMappings, valueDataNode, "value", typeof(XmlMapValueAttribute));
+                object? key = provider.DeserializePropertyValue(modelType, keyDataNode, propInfo.KeyMappingProperty, document);
+                object? value = provider.DeserializePropertyValue(modelType, valueDataNode, propInfo.ValueMappingProperty, document);
 
                 resultAddMethod.Invoke(result, new[] { key, value });
             }
@@ -97,8 +67,6 @@ namespace Spooksoft.Xml.Serialization.Infrastructure.MapSerializers
 
         public void Serialize(object? map, Type modelType, MapPropertyInfo propInfo, XmlElement propertyElement, XmlDocument document, IXmlSerializationProvider provider)
         {
-            (var keyType, var valueType, var keyMappings, var valueMappings) = GetReverseMappings(propInfo, provider.ConverterProvider, provider.ClassInfoProvider);
-
             // Null map
 
             if (map == null)
@@ -113,7 +81,7 @@ namespace Spooksoft.Xml.Serialization.Infrastructure.MapSerializers
 
             // Item type
 
-            var kvpType = typeof(KeyValuePair<,>).MakeGenericType(keyType, valueType);
+            var kvpType = typeof(KeyValuePair<,>).MakeGenericType(propInfo.KeyType, propInfo.ValueType);
             var keyProp = kvpType.GetProperty("Key")!;
             var valueProp = kvpType.GetProperty("Value")!;
 
@@ -121,64 +89,16 @@ namespace Spooksoft.Xml.Serialization.Infrastructure.MapSerializers
 
             foreach (var kvp in enumerable)
             {
-                (Type, object?, string) GetTypeForProperty(PropertyInfo prop, Type defaultType, Dictionary<Type, string> mappings, string propertyName, Type attributeType)
-                {
-                    var itemValue = prop.GetValue(kvp);
-                    Type itemPropertyType;
-                    if (itemValue == null)
-                        itemPropertyType = defaultType;
-                    else
-                        itemPropertyType = itemValue.GetType();
-
-                    if (!mappings.TryGetValue(itemPropertyType, out string? propertyElementName) || string.IsNullOrEmpty(propertyElementName))
-                        throw new XmlSerializationException($"Not recognized type of {propertyName} in the map (of type {itemPropertyType.Name}). Add missing {attributeType.Name} to the property {propInfo.XmlName} of class {modelType.Name}.\r\nIf you want to use null {propertyName}s in the map, remember to add {nameof(XmlMapKeyAttribute)} for the map {propertyName} type (even if it is abstract)");
-
-                    return (itemPropertyType, itemValue, propertyElementName);
-                }
-
-                // Key/Value types and values
-
-                (var itemKeyType, var key, string keyName) = GetTypeForProperty(keyProp, keyType, keyMappings, "key", typeof(XmlMapKeyAttribute));
-                (var itemValueType, var value, string valueName) = GetTypeForProperty(valueProp, valueType, valueMappings, "value", typeof(XmlMapValueAttribute));
-
-                // Item
-
                 var itemElement = document.CreateElement("Item");
-
-                // Key and Value elements
-
-                void AppendProperty(string pairItemElementName, string pairItemDataElementName, object? pairItemValue, Type pairItemPropertyType)
-                {
-                    var pairItemElement = document.CreateElement(pairItemElementName);
-                    itemElement.AppendChild(pairItemElement);
-
-                    if (pairItemValue == null)
-                    {
-                        var propertyDataElement = document.CreateElement(pairItemDataElementName);
-                        pairItemElement.AppendChild(propertyDataElement);
-                        propertyDataElement.SetAttribute(Constants.NIL_ATTRIBUTE, Constants.CONTROL_NAMESPACE_URI, "true");
-                    }
-                    else
-                    {
-                        var converter = provider.ConverterProvider.GetConverter(pairItemPropertyType);
-                        if (converter != null)
-                        {
-                            var propertyDataElement = document.CreateElement(pairItemDataElementName);
-                            pairItemElement.AppendChild(propertyDataElement);
-                            propertyDataElement.InnerText = converter.Serialize(pairItemValue);
-                        }
-                        else
-                        {
-                            var serializedDataElement = provider.SerializeObjectToElement(pairItemValue, pairItemPropertyType, pairItemDataElementName, document);
-                            pairItemElement.AppendChild(serializedDataElement);
-                        }
-                    }
-                }
-
-                AppendProperty("Key", keyName, key, itemKeyType);
-                AppendProperty("Value", valueName, value, itemValueType);
-
                 propertyElement.AppendChild(itemElement);
+
+                var keyElement = document.CreateElement("Key");
+                provider.SerializePropertyValue(modelType, keyElement, keyProp.GetValue(kvp), propInfo.KeyMappingProperty, document);
+                itemElement.AppendChild(keyElement);
+
+                var valueElement = document.CreateElement("Value");
+                provider.SerializePropertyValue(modelType, valueElement, valueProp.GetValue(kvp), propInfo.ValueMappingProperty, document);
+                itemElement.AppendChild(valueElement);
             }
         }
     }

@@ -305,5 +305,54 @@ namespace Spooksoft.Xml.Serialization.Test
             Assert.IsNotNull(deserialized);
             Assert.AreEqual(String.Empty, deserialized.StringProperty);
         }
+
+        [TestMethod]                
+        public void VaryingTypeSerializationTyest()
+        {
+            // Arrange
+
+            var model = new VaryingPropertyTypeModel()
+            {
+                MyProperty = new DerivedPropertyType1
+                {
+                    IntProperty = 1,
+                    StringProperty = "Test"
+                }
+            };
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(model, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.IsNotNull(deserialized.MyProperty);
+            Assert.IsInstanceOfType(deserialized.MyProperty, typeof(DerivedPropertyType1));
+            Assert.AreEqual(1, ((DerivedPropertyType1)deserialized.MyProperty).IntProperty);
+            Assert.AreEqual("Test", ((DerivedPropertyType1)deserialized.MyProperty).StringProperty);
+        }
+
+        [TestMethod]
+        public void VaryingTypeNullSerializationTyest()
+        {
+            // Arrange
+
+            var model = new VaryingPropertyTypeModel()
+            {
+                MyProperty = null
+            };
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(model, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.IsNull(deserialized.MyProperty);            
+        }
     }
 }

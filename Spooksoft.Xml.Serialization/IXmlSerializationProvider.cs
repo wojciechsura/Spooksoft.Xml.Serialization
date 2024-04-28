@@ -8,12 +8,8 @@ using System.Xml;
 namespace Spooksoft.Xml.Serialization
 {
     internal interface IXmlSerializationProvider
-    {
-        IConverterProvider ConverterProvider { get; }
-        IClassSerializationInfoProvider ClassInfoProvider { get; }
-
-        object? DeserializeExpectedType(Type expectedType, string elementName, XmlElement element, XmlDocument document);
-        object? DeserializeExpectedTypes(Type baseType, Dictionary<string, Type> expectedDescendingTypes, XmlElement element, XmlDocument document);
-        XmlElement SerializeObjectToElement(object? model, Type modelType, string elementName, XmlDocument document);
+    { 
+        void SerializePropertyValue(Type modelType, XmlElement propertyElement, object? value, ITypeMappingProperty property, XmlDocument document);
+        object? DeserializePropertyValue(Type modelType, XmlElement itemElement, ITypeMappingProperty property, XmlDocument document);
     }
 }

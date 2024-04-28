@@ -1,4 +1,5 @@
 ﻿using Spooksoft.Xml.Serialization.Attributes;
+using Spooksoft.Xml.Serialization.Exceptions;
 using Spooksoft.Xml.Serialization.Types;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,52 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
             ConstructorParameterIndex = constructorParameterIndex;
         }
 
+        protected static (Dictionary<string, Type> deserializationMappings, Dictionary<Type, string> serializationMappings, bool usedCustomMappings) BuildMappings(
+            Type baseType,
+            string baseName,
+            Dictionary<string, Type> customTypeMappings)
+        {
+            Dictionary<string, Type> deserializationMappings;
+            Dictionary<Type, string> serializationMappings;
+            bool usedCustomMappings;
+
+            if (customTypeMappings != null && customTypeMappings.Any())
+            {
+                usedCustomMappings = true;
+
+                deserializationMappings = customTypeMappings;
+
+                serializationMappings = new();
+
+                foreach (var mapping in customTypeMappings)
+                {
+                    // Validate mappings
+
+                    if (serializationMappings.ContainsKey(mapping.Value))
+                        throw new XmlInvalidTypeMappingsException($"Invalid custom mappings: there are multiple mappings with name {mapping.Value}");
+                    if (!mapping.Value.IsAssignableTo(baseType))
+                        throw new XmlModelDefinitionException($"Invalid type mapping. Type {mapping.Value.Name} is not assignable to {baseType.Name}!");
+
+                    serializationMappings[mapping.Value] = mapping.Key;
+                }
+            }
+            else
+            {
+                usedCustomMappings = false;
+
+                deserializationMappings = new()
+                {
+                    { baseName, baseType }
+                };
+                serializationMappings = new()
+                {
+                    { baseType, baseName }
+                };
+            }
+
+            return (deserializationMappings, serializationMappings, usedCustomMappings);
+        }
+
         /// <summary>
         /// Checks if the given property matches the XML placement
         /// (has the same XML name and placement: element or attribute)
@@ -30,6 +77,7 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
         }
 
         public PropertyInfo Property { get; }
+
         public XmlPlacementAttribute? PlacementAttribute { get; }
 
         public int? ConstructorParameterIndex { get; }

@@ -236,7 +236,13 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
                         {
                             // Serialize property as a class
 
-                            var simpleProp = new SimplePropertyInfo(property, placementAttribute, matchingCtorParamIndex);
+                            Dictionary<string, Type> customTypeMappings = property.GetCustomAttributes<XmlVariantAttribute>()
+                                .ToDictionary(a => a.Name, a => a.Type);
+
+                            if (customTypeMappings.Any() && placementAttribute != null && placementAttribute.Placement != XmlPlacement.Element)
+                                throw new XmlModelDefinitionException($"Property {property.Name} of type {type.Name} have defined one or multiple {nameof(XmlVariantAttribute)} attributes - it can be placed only in an element.");
+
+                            var simpleProp = new SimplePropertyInfo(property, placementAttribute, matchingCtorParamIndex, customTypeMappings);
 
                             if (typeProperties.Exists(tp => tp.MatchesXmlPlacement(simpleProp)))
                                 throw new XmlModelDefinitionException($"Two or more properties in type {type.Name} matches XML placement of {simpleProp.XmlPlacement} and name {simpleProp.XmlName}");

@@ -8,15 +8,15 @@
     <Description>Simple XML Serializer supporting serialization of immutable types</Description>
     <PackageProjectUrl>https://github.com/wojciechsura/Spooksoft.Xml.Serialization</PackageProjectUrl>
     <RepositoryUrl>https://github.com/wojciechsura/Spooksoft.Xml.Serialization</RepositoryUrl>
-    <PackageReleaseNotes>Added support for varying-typed properties, refactored varying-typed item serialization</PackageReleaseNotes>
+    <PackageReleaseNotes>Added attribute [XmlIncludeDerived] to simplify working with class hierarchies</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>spook</Authors>
     <Company>Spooksoft</Company>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <AssemblyVersion>1.0.2</AssemblyVersion>
-    <FileVersion>1.0.2</FileVersion>
-    <Version>1.0.2</Version>
+    <AssemblyVersion>1.0.3</AssemblyVersion>
+    <FileVersion>1.0.3</FileVersion>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0|AnyCPU'">

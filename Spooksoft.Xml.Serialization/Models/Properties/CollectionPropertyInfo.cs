@@ -40,8 +40,22 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
                 BaseType = property.PropertyType.GetGenericArguments()[0];
             }
 
+            var includeMappings = BaseType.GetCustomAttributes<XmlIncludeDerivedAttribute>()
+                .ToDictionary(a => a.Name, a => a.Type);
+
+            if (customTypeMappings != null)
+            {
+                foreach (var kvp in customTypeMappings)
+                {
+                    if (includeMappings.ContainsKey(kvp.Key))
+                        throw new XmlModelDefinitionException($"Custom type mapping for name {kvp.Key} is already defined in the base type through {nameof(XmlIncludeDerivedAttribute)}. Inspect the type {BaseType.Name} and/or rename custom type mapping in collection.");
+
+                    includeMappings[kvp.Key] = kvp.Value;
+                }
+            }
+
             (var deserializationMappings, var serializationMappings, _) = 
-                BuildMappings(BaseType, "Item", customTypeMappings);
+                BuildMappings(BaseType, "Item", includeMappings);
 
             DeserializationMappings = deserializationMappings;
             SerializationMappings = serializationMappings;

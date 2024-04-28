@@ -62,6 +62,47 @@ public class MyClass
 }
 ```
 
+This can be also achieved differently, by using `XmlIncludeDerived` attribute on base property type:
+
+```csharp
+[XmlIncludeDerived("Base", typeof(BaseType))]
+[XmlIncludeDerived("Derived1", typeof(DerivedType1))]
+[XmlIncludeDerived("Derived2", typeof(DerivedType2))]
+public class BaseType
+{
+
+}
+
+public class MyClass
+{
+    // No attributes needed here anymore
+    public BaseType Prop { get; set; }
+}
+```
+
+The same will work as well for collections and maps (see below).
+
+If you use both `XmlIncludeDerived` and `XmlVariant` (or `XmlArrayItem` in case of collections or `XmlMapKey`/`XmlMapValue` in case of maps), then all mapped types will be merged. 
+
+Note that neither **names** nor **types** in the custom mapping lists must not duplicate:
+
+```csharp
+[XmlIncludeDerived("Derived1", typeof(DerivedType1))]
+public class BaseType
+{
+
+}
+
+public class MyModel
+{
+    // WRONG! Name Derived1 has already been used
+    [XmlVariant("Derived1", typeof(SomeType))]
+    // WRONG! Type DerivedType1 has already been mapped
+    [XmlVariant("SomeName", typeof(DerivedType1))]
+    public BaseType Prop { get; set; }
+}
+```
+
 # Collections
 
 Collections must be marked with `XmlArray` attribute. If you want to support various types in the collection, add `XmlArrayItem` attributes.

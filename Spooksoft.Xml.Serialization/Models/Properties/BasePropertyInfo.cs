@@ -43,7 +43,7 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
                     // Validate mappings
 
                     if (serializationMappings.ContainsKey(mapping.Value))
-                        throw new XmlInvalidTypeMappingsException($"Invalid custom mappings: there are multiple mappings with name {mapping.Value}");
+                        throw new XmlInvalidTypeMappingsException($"Invalid custom mappings: there are multiple mappings of type {mapping.Value}. Note that mappings may be as well defined for the type {baseType.Name} with {nameof(XmlIncludeDerivedAttribute)} attribute.");
                     if (!mapping.Value.IsAssignableTo(baseType))
                         throw new XmlModelDefinitionException($"Invalid type mapping. Type {mapping.Value.Name} is not assignable to {baseType.Name}!");
 

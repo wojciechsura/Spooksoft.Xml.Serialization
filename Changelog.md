@@ -12,3 +12,7 @@
 
 * [new] Added support for varying-type properties
 * Refactored implementation of varying-type item serialization (XmlArrayItem, XmlMapKeyItem, XmlMapValueItem, XmlVariant) to reduce duplicated code and simplify implementation
+
+# 1.0.3
+
+* [new] Added attribute `XmlIncludeDerived` to simplify working with class hierarchies

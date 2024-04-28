@@ -1,4 +1,5 @@
 ﻿using Spooksoft.Xml.Serialization.Attributes;
+using Spooksoft.Xml.Serialization.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,8 +25,22 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
             Dictionary<string, Type> customTypeMappings) 
             : base(property, placementAttribute, constructorParameterIndex)
         {
+            var includeMappings = property.PropertyType.GetCustomAttributes<XmlIncludeDerivedAttribute>()
+               .ToDictionary(a => a.Name, a => a.Type);
+
+            if (customTypeMappings != null)
+            {
+                foreach (var kvp in customTypeMappings)
+                {
+                    if (includeMappings.ContainsKey(kvp.Key))
+                        throw new XmlModelDefinitionException($"Custom type mapping for name {kvp.Key} is already defined in the base type through {nameof(XmlIncludeDerivedAttribute)}. Inspect the type {property.PropertyType.Name} and/or rename custom type mapping in collection.");
+
+                    includeMappings[kvp.Key] = kvp.Value;
+                }
+            }
+
             (var deserializationMappings, var serializationMappings, var usedCustomMappings) =
-                BuildMappings(property.PropertyType, XmlName, customTypeMappings);
+                BuildMappings(property.PropertyType, XmlName, includeMappings);
 
             DeserializationMappings = deserializationMappings;
             SerializationMappings = serializationMappings;

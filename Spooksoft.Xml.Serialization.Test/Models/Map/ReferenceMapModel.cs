@@ -9,12 +9,12 @@ namespace Spooksoft.Xml.Serialization.Test.Models.Map
 {
     public class ReferenceMapModel
     {
-        [XmlMap]
-        [XmlMapKey("BaseKey", typeof(BaseKey))]
-        [XmlMapKey("DerivedKey", typeof(DerivedKey))]
-        [XmlMapValue("BaseValue", typeof(BaseValue))]
-        [XmlMapValue("DerivedValue1", typeof(DerivedValue1))]
-        [XmlMapValue("DerivedValue2", typeof(DerivedValue2))]
+        [SpkXmlMap]
+        [SpkXmlMapKey("BaseKey", typeof(BaseKey))]
+        [SpkXmlMapKey("DerivedKey", typeof(DerivedKey))]
+        [SpkXmlMapValue("BaseValue", typeof(BaseValue))]
+        [SpkXmlMapValue("DerivedValue1", typeof(DerivedValue1))]
+        [SpkXmlMapValue("DerivedValue2", typeof(DerivedValue2))]
         public Dictionary<BaseKey, BaseValue?>? Dictionary { get; set; }
     }
 }

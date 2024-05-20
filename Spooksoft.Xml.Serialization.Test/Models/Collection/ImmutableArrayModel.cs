@@ -10,10 +10,10 @@ namespace Spooksoft.Xml.Serialization.Test.Models.Collection
 {
     public class ImmutableArrayModel
     {
-        [XmlArray]
-        [XmlArrayItem("ItemA", typeof(ListItemA))]
-        [XmlArrayItem("ItemB", typeof(ListItemB))]
-        [XmlArrayItem("BaseItem", typeof(BaseListItem))]
+        [SpkXmlArray]
+        [SpkXmlArrayItem("ItemA", typeof(ListItemA))]
+        [SpkXmlArrayItem("ItemB", typeof(ListItemB))]
+        [SpkXmlArrayItem("BaseItem", typeof(BaseListItem))]
         public ImmutableArray<BaseListItem?> ImmutableArray { get; set; }
     }
 }

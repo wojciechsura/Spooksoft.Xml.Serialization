@@ -9,7 +9,7 @@ namespace Spooksoft.Xml.Serialization.Test.Models.Binary
 {
     public class BinaryModel
     {
-        [XmlBinary]
+        [SpkXmlBinary]
         public byte[]? BinaryData { get; set; }
     }
 }

@@ -9,7 +9,7 @@ namespace Spooksoft.Xml.Serialization.Test.Models.Simple
 {
     public class StringPropModel
     {
-        [XmlAttribute("MyString")]
+        [SpkXmlAttribute("MyString")]
         public string? StringProperty { get; set; }
     }
 }

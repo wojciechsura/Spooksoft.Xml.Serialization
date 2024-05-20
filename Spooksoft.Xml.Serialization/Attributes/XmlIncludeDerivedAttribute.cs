@@ -6,16 +6,11 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization.Attributes
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    public class XmlIncludeDerivedAttribute : Attribute
+    [Obsolete("Please use SpkXmlIncludeDerivedAttribute instead to avoid clash with System.Xml.Serialization namespace.")]
+    public class XmlIncludeDerivedAttribute : SpkXmlIncludeDerivedAttribute
     {
-        public XmlIncludeDerivedAttribute(string name, Type type)
+        public XmlIncludeDerivedAttribute(string name, Type type) : base(name, type)
         {
-            Name = name;
-            Type = type;
         }
-
-        public string Name { get; }
-        public Type Type { get; }
     }
 }

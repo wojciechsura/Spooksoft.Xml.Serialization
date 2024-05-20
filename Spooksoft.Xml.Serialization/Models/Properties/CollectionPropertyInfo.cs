@@ -15,12 +15,12 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
 
         string ITypeMappingProperty.Name => Property.Name;
 
-        Type ITypeMappingProperty.CustomTypeAttribute => typeof(XmlArrayItemAttribute);
+        Type ITypeMappingProperty.CustomTypeAttribute => typeof(SpkXmlArrayItemAttribute);
 
         // Public methods -----------------------------------------------------
 
         public CollectionPropertyInfo(PropertyInfo property, 
-            XmlPlacementAttribute? placementAttribute, 
+            SpkXmlPlacementAttribute? placementAttribute, 
             int? constructorParameterIndex, 
             Dictionary<string, Type> customTypeMappings) 
             : base(property, placementAttribute, constructorParameterIndex)
@@ -40,7 +40,7 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
                 BaseType = property.PropertyType.GetGenericArguments()[0];
             }
 
-            var includeMappings = BaseType.GetCustomAttributes<XmlIncludeDerivedAttribute>()
+            var includeMappings = BaseType.GetCustomAttributes<SpkXmlIncludeDerivedAttribute>()
                 .ToDictionary(a => a.Name, a => a.Type);
 
             if (customTypeMappings != null)
@@ -48,7 +48,7 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
                 foreach (var kvp in customTypeMappings)
                 {
                     if (includeMappings.ContainsKey(kvp.Key))
-                        throw new XmlModelDefinitionException($"Custom type mapping for name {kvp.Key} is already defined in the base type through {nameof(XmlIncludeDerivedAttribute)}. Inspect the type {BaseType.Name} and/or rename custom type mapping in collection.");
+                        throw new XmlModelDefinitionException($"Custom type mapping for name {kvp.Key} is already defined in the base type through {nameof(SpkXmlIncludeDerivedAttribute)}. Inspect the type {BaseType.Name} and/or rename custom type mapping in collection.");
 
                     includeMappings[kvp.Key] = kvp.Value;
                 }

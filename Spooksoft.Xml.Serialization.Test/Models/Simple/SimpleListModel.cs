@@ -9,7 +9,7 @@ namespace Spooksoft.Xml.Serialization.Test.Models.Simple
 {
     public class SimpleListModel
     {
-        [XmlArray]
+        [SpkXmlArray]
         public List<SimpleModel>? ListProperty { get; set; }
     }
 }

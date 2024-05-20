@@ -9,10 +9,10 @@ namespace Spooksoft.Xml.Serialization.Test.Models.Collection
 {
     public class ReferenceArrayModel
     {
-        [XmlArray]
-        [XmlArrayItem("ItemA", typeof(ListItemA))]
-        [XmlArrayItem("ItemB", typeof(ListItemB))]
-        [XmlArrayItem("BaseItem", typeof(BaseListItem))]
+        [SpkXmlArray]
+        [SpkXmlArrayItem("ItemA", typeof(ListItemA))]
+        [SpkXmlArrayItem("ItemB", typeof(ListItemB))]
+        [SpkXmlArrayItem("BaseItem", typeof(BaseListItem))]
         public BaseListItem?[]? ArrayProp { get; set; }
     }
 }

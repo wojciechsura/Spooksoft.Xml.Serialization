@@ -9,14 +9,14 @@ namespace Spooksoft.Xml.Serialization.Models
 {
     internal abstract class BaseClassInfo
     {
-        protected BaseClassInfo(Type type, XmlRootAttribute? rootAttribute)
+        protected BaseClassInfo(Type type, SpkXmlRootAttribute? rootAttribute)
         {
             Type = type;
             RootAttribute = rootAttribute;
         }
 
         public Type Type { get; }
-        public XmlRootAttribute? RootAttribute { get; }
+        public SpkXmlRootAttribute? RootAttribute { get; }
 
         public string XmlRoot => RootAttribute?.Name ?? Type.Name;
     }

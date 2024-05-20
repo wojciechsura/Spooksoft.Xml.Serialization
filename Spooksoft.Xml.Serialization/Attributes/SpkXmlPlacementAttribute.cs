@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace Spooksoft.Xml.Serialization.Attributes
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public abstract class XmlPlacementAttribute : Attribute
+    public abstract class SpkXmlPlacementAttribute : Attribute
     {
-        protected XmlPlacementAttribute(string name)
+        protected SpkXmlPlacementAttribute(string name)
         {
             Name = name;
         }

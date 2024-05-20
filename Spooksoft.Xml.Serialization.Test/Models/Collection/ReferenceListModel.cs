@@ -9,9 +9,9 @@ namespace Spooksoft.Xml.Serialization.Test.Models.Collection
 {
     public class ReferenceListModel
     {
-        [XmlArray]
-        [XmlArrayItem("ItemA", typeof(ListItemA))]
-        [XmlArrayItem("ItemB", typeof(ListItemB))]
+        [SpkXmlArray]
+        [SpkXmlArrayItem("ItemA", typeof(ListItemA))]
+        [SpkXmlArrayItem("ItemB", typeof(ListItemB))]
         public List<BaseListItem>? List { get; set; }
     }
 }

@@ -231,7 +231,7 @@ namespace Spooksoft.Xml.Serialization
                 var propertyType = binaryProp.Property.PropertyType;
 
                 if (propertyType != typeof(byte[]))
-                    throw new XmlModelDefinitionException($"An {nameof(XmlBinaryAttribute)} attribute can be attached only to a property of type byte[]");
+                    throw new XmlModelDefinitionException($"An {nameof(SpkXmlBinaryAttribute)} attribute can be attached only to a property of type byte[]");
 
                 // Get property value
 

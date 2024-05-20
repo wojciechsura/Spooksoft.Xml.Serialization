@@ -9,7 +9,7 @@ namespace Spooksoft.Xml.Serialization.Test.Models.Map
 {
     public class SimpleMapModel
     {
-        [XmlMap]
+        [SpkXmlMap]
         public Dictionary<string, int>? Dictionary { get; set; }
     }
 }

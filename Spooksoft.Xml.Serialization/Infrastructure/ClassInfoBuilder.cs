@@ -73,10 +73,10 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
                 var attributes = matchingProp.GetCustomAttributes();
 
                 var placementAttributes = attributes
-                    .OfType<XmlPlacementAttribute>()
+                    .OfType<SpkXmlPlacementAttribute>()
                     .ToArray();
 
-                XmlPlacementAttribute? placementAttribute = null;
+                SpkXmlPlacementAttribute? placementAttribute = null;
 
                 if (placementAttributes.Length == 1)
                 {
@@ -88,9 +88,9 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
                 // Check if property does not have XmlIgnore attribute attached
                 // That's an error
 
-                XmlIgnoreAttribute? ignoreAttribute = matchingProp.GetCustomAttribute<XmlIgnoreAttribute>();
+                SpkXmlIgnoreAttribute? ignoreAttribute = matchingProp.GetCustomAttribute<SpkXmlIgnoreAttribute>();
                 if (ignoreAttribute != null)
-                    throw new XmlModelDefinitionException($"Property {matchingProp.Name} of class {type.Name} have {nameof(XmlIgnoreAttribute)} attribute attached, but it matches one of constructor's parameters and must be serialized.");
+                    throw new XmlModelDefinitionException($"Property {matchingProp.Name} of class {type.Name} have {nameof(SpkXmlIgnoreAttribute)} attribute attached, but it matches one of constructor's parameters and must be serialized.");
 
                 constructorParameters.Add(new ConstructorParameterInfo(matchingProp, placementAttribute));
             }
@@ -104,7 +104,7 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
 
             ParameterlessClassConstructionInfo? parameterlessCtor = GetParameterlessCtor(type);
 
-            XmlRootAttribute? xmlRoot = type.GetCustomAttribute<XmlRootAttribute>();
+            SpkXmlRootAttribute? xmlRoot = type.GetCustomAttribute<SpkXmlRootAttribute>();
 
             // 2. Figure out if the type implements IXmlSerializable and 
             //    has a parameterless ctor
@@ -134,25 +134,25 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
             {
                 // Check for XmlIgnore
 
-                var xmlIgnore = property.GetCustomAttribute<XmlIgnoreAttribute>();
+                var xmlIgnore = property.GetCustomAttribute<SpkXmlIgnoreAttribute>();
                 if (xmlIgnore != null)
                     continue;
 
                 // Non-readable properties are not supported
 
                 if (!property.CanRead)
-                    throw new XmlModelDefinitionException($"Please explicitly mark non-readable (and thus non-serializable) property {property.Name} of class {type.Name} with attribute {nameof(XmlIgnoreAttribute)}");
+                    throw new XmlModelDefinitionException($"Please explicitly mark non-readable (and thus non-serializable) property {property.Name} of class {type.Name} with attribute {nameof(SpkXmlIgnoreAttribute)}");
 
                 // Check for XmlPlacement attribute
 
                 var attributes = property.GetCustomAttributes();
-                var placementAttributes = attributes.OfType<XmlPlacementAttribute>().ToArray();
-                XmlPlacementAttribute? placementAttribute = null;
+                var placementAttributes = attributes.OfType<SpkXmlPlacementAttribute>().ToArray();
+                SpkXmlPlacementAttribute? placementAttribute = null;
 
                 if (placementAttributes.Length == 1)
                     placementAttribute = placementAttributes[0];
                 else if (placementAttributes.Length > 1)
-                    throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} have more than one {nameof(XmlPlacementAttribute)} attribute!");
+                    throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} have more than one {nameof(SpkXmlPlacementAttribute)} attribute!");
 
                 // Check if property doesn't match ctor parameter
 
@@ -174,35 +174,35 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
                 }
 
                 if ((matchingCtorParam == null || matchingCtorParamIndex == null) && !property.CanWrite)
-                    throw new XmlModelDefinitionException($"A read-only property {property.Name} of class {type.Name} can be serialized only if it matches a ctor parameter. If not, explicitly mark it with attribute {nameof(XmlIgnoreAttribute)}");
+                    throw new XmlModelDefinitionException($"A read-only property {property.Name} of class {type.Name} can be serialized only if it matches a ctor parameter. If not, explicitly mark it with attribute {nameof(SpkXmlIgnoreAttribute)}");
 
                 // Check if property is a collection
 
                 BasePropertyInfo propInfo;
 
-                var xmlBinary = property.GetCustomAttribute<XmlBinaryAttribute>();
+                var xmlBinary = property.GetCustomAttribute<SpkXmlBinaryAttribute>();
                 if (xmlBinary != null)
                 {
                     if (property.PropertyType != typeof(byte[]))
-                        throw new XmlModelDefinitionException($"An {nameof(XmlBinaryAttribute)} attribute can be attached only to a property of type byte[]");
+                        throw new XmlModelDefinitionException($"An {nameof(SpkXmlBinaryAttribute)} attribute can be attached only to a property of type byte[]");
 
                     // Serialize property as a collection
                     if (placementAttribute != null && placementAttribute.Placement != XmlPlacement.Element)
-                        throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} is defined as an {nameof(XmlBinaryAttribute)}, which means it can be placed only in an element.");
+                        throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} is defined as an {nameof(SpkXmlBinaryAttribute)}, which means it can be placed only in an element.");
 
                     var binaryProp = new BinaryPropertyInfo(property, placementAttribute, matchingCtorParamIndex);
                     propInfo = binaryProp;
                 }
                 else
                 {
-                    var xmlArray = property.GetCustomAttribute<XmlArrayAttribute>();
+                    var xmlArray = property.GetCustomAttribute<SpkXmlArrayAttribute>();
                     if (xmlArray != null)
                     {
                         // Serialize property as a collection
                         if (placementAttribute != null && placementAttribute.Placement != XmlPlacement.Element)
-                            throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} is defined as an {nameof(XmlArrayAttribute)}, which means it can be placed only in an element.");
+                            throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} is defined as an {nameof(SpkXmlArrayItemAttribute)}, which means it can be placed only in an element.");
 
-                        Dictionary<string, Type> customTypeMappings = property.GetCustomAttributes<XmlArrayItemAttribute>()
+                        Dictionary<string, Type> customTypeMappings = property.GetCustomAttributes<SpkXmlArrayItemAttribute>()
                             .ToDictionary(a => a.Name, a => a.Type);
 
                         var collectionProp = new CollectionPropertyInfo(property, placementAttribute, matchingCtorParamIndex, customTypeMappings);
@@ -214,15 +214,15 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
                     }
                     else
                     {
-                        var xmlMap = property.GetCustomAttribute<XmlMapAttribute>();
+                        var xmlMap = property.GetCustomAttribute<SpkXmlMapAttribute>();
                         if (xmlMap != null)
                         {
                             if (placementAttribute != null && placementAttribute.Placement != XmlPlacement.Element)
-                                throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} is defined as an {nameof(XmlMapAttribute)}, which means it can be placed only in an element.");
+                                throw new XmlModelDefinitionException($"Property {property.Name} of class {type.Name} is defined as an {nameof(SpkXmlMapAttribute)}, which means it can be placed only in an element.");
 
-                            Dictionary<string, Type> customKeyTypeMappings = property.GetCustomAttributes<XmlMapKeyAttribute>()
+                            Dictionary<string, Type> customKeyTypeMappings = property.GetCustomAttributes<SpkXmlMapKeyAttribute>()
                                 .ToDictionary(a => a.Name, a => a.Type);
-                            Dictionary<string, Type> customValueTypeMappings = property.GetCustomAttributes<XmlMapValueAttribute>()
+                            Dictionary<string, Type> customValueTypeMappings = property.GetCustomAttributes<SpkXmlMapValueAttribute>()
                                 .ToDictionary(a => a.Name, a => a.Type);
 
                             var mapProp = new MapPropertyInfo(property, placementAttribute, matchingCtorParamIndex, customKeyTypeMappings, customValueTypeMappings);
@@ -236,11 +236,11 @@ namespace Spooksoft.Xml.Serialization.Infrastructure
                         {
                             // Serialize property as a class
 
-                            Dictionary<string, Type> customTypeMappings = property.GetCustomAttributes<XmlVariantAttribute>()
+                            Dictionary<string, Type> customTypeMappings = property.GetCustomAttributes<SpkXmlVariantAttribute>()
                                 .ToDictionary(a => a.Name, a => a.Type);
 
                             if (customTypeMappings.Any() && placementAttribute != null && placementAttribute.Placement != XmlPlacement.Element)
-                                throw new XmlModelDefinitionException($"Property {property.Name} of type {type.Name} have defined one or multiple {nameof(XmlVariantAttribute)} attributes - it can be placed only in an element.");
+                                throw new XmlModelDefinitionException($"Property {property.Name} of type {type.Name} have defined one or multiple {nameof(SpkXmlVariantAttribute)} attributes - it can be placed only in an element.");
 
                             var simpleProp = new SimplePropertyInfo(property, placementAttribute, matchingCtorParamIndex, customTypeMappings);
 

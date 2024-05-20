@@ -42,7 +42,7 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
         private readonly MappingPropertyProxy valueProxy;
 
         public MapPropertyInfo(PropertyInfo property,
-            XmlPlacementAttribute? placementAttribute,
+            SpkXmlPlacementAttribute? placementAttribute,
             int? constructorParameterIndex,
             Dictionary<string, Type> customKeyTypeMappings,
             Dictionary<string, Type> customValueTypeMappings)
@@ -55,7 +55,7 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
 
             KeyType = property.PropertyType.GetGenericArguments()[0];
 
-            var keyIncludeMappings = KeyType.GetCustomAttributes<XmlIncludeDerivedAttribute>()
+            var keyIncludeMappings = KeyType.GetCustomAttributes<SpkXmlIncludeDerivedAttribute>()
                .ToDictionary(a => a.Name, a => a.Type);
 
             if (customKeyTypeMappings != null)
@@ -63,7 +63,7 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
                 foreach (var kvp in customKeyTypeMappings)
                 {
                     if (keyIncludeMappings.ContainsKey(kvp.Key))
-                        throw new XmlModelDefinitionException($"Custom key type mapping for name {kvp.Key} is already defined in the base type through {nameof(XmlIncludeDerivedAttribute)}. Inspect the type {KeyType.Name} and/or rename custom type mapping in collection.");
+                        throw new XmlModelDefinitionException($"Custom key type mapping for name {kvp.Key} is already defined in the base type through {nameof(SpkXmlIncludeDerivedAttribute)}. Inspect the type {KeyType.Name} and/or rename custom type mapping in collection.");
 
                     keyIncludeMappings[kvp.Key] = kvp.Value;
                 }
@@ -78,7 +78,7 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
 
             ValueType = property.PropertyType.GetGenericArguments()[1];
 
-            var valueIncludeMappings = ValueType.GetCustomAttributes<XmlIncludeDerivedAttribute>()
+            var valueIncludeMappings = ValueType.GetCustomAttributes<SpkXmlIncludeDerivedAttribute>()
                            .ToDictionary(a => a.Name, a => a.Type);
 
             if (customValueTypeMappings != null)
@@ -86,7 +86,7 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
                 foreach (var kvp in customValueTypeMappings)
                 {
                     if (valueIncludeMappings.ContainsKey(kvp.Key))
-                        throw new XmlModelDefinitionException($"Custom value type mapping for name {kvp.Key} is already defined in the base type through {nameof(XmlIncludeDerivedAttribute)}. Inspect the type {ValueType.Name} and/or rename custom type mapping in collection.");
+                        throw new XmlModelDefinitionException($"Custom value type mapping for name {kvp.Key} is already defined in the base type through {nameof(SpkXmlIncludeDerivedAttribute)}. Inspect the type {ValueType.Name} and/or rename custom type mapping in collection.");
 
                     valueIncludeMappings[kvp.Key] = kvp.Value;
                 }
@@ -99,8 +99,8 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
 
             // Proxies
 
-            keyProxy = new MappingPropertyProxy(property.Name, KeyType, SerializationKeyTypeMappings, DeserializationKeyTypeMappings, typeof(XmlMapKeyAttribute));
-            valueProxy = new MappingPropertyProxy(property.Name, ValueType, SerializationValueTypeMappings, DeserializationValueTypeMappings, typeof(XmlMapValueAttribute));
+            keyProxy = new MappingPropertyProxy(property.Name, KeyType, SerializationKeyTypeMappings, DeserializationKeyTypeMappings, typeof(SpkXmlMapKeyAttribute));
+            valueProxy = new MappingPropertyProxy(property.Name, ValueType, SerializationValueTypeMappings, DeserializationValueTypeMappings, typeof(SpkXmlMapValueAttribute));
         }
 
         public Dictionary<string, Type> DeserializationKeyTypeMappings { get; }

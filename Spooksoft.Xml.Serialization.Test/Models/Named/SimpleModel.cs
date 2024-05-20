@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization.Test.Models.Named
 {
-    [XmlRoot("MySimpleModel")]
+    [SpkXmlRoot("MySimpleModel")]
     public class SimpleModel
     {
-        [XmlElement("MyIntProperty")]
+        [SpkXmlElement("MyIntProperty")]
         public int IntProperty { get; set; }
 
-        [XmlAttribute("MyStringProperty")]
+        [SpkXmlAttribute("MyStringProperty")]
         public string? StringProperty { get; set; }
     }
 }

@@ -15,17 +15,17 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
 
         string ITypeMappingProperty.Name => Property.Name;
 
-        Type ITypeMappingProperty.CustomTypeAttribute => typeof(XmlVariantAttribute);
+        Type ITypeMappingProperty.CustomTypeAttribute => typeof(SpkXmlVariantAttribute);
 
         // Public methods -----------------------------------------------------
 
         public SimplePropertyInfo(PropertyInfo property, 
-            XmlPlacementAttribute? placementAttribute, 
+            SpkXmlPlacementAttribute? placementAttribute, 
             int? constructorParameterIndex,
             Dictionary<string, Type> customTypeMappings) 
             : base(property, placementAttribute, constructorParameterIndex)
         {
-            var includeMappings = property.PropertyType.GetCustomAttributes<XmlIncludeDerivedAttribute>()
+            var includeMappings = property.PropertyType.GetCustomAttributes<SpkXmlIncludeDerivedAttribute>()
                .ToDictionary(a => a.Name, a => a.Type);
 
             if (customTypeMappings != null)
@@ -33,7 +33,7 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
                 foreach (var kvp in customTypeMappings)
                 {
                     if (includeMappings.ContainsKey(kvp.Key))
-                        throw new XmlModelDefinitionException($"Custom type mapping for name {kvp.Key} is already defined in the base type through {nameof(XmlIncludeDerivedAttribute)}. Inspect the type {property.PropertyType.Name} and/or rename custom type mapping in collection.");
+                        throw new XmlModelDefinitionException($"Custom type mapping for name {kvp.Key} is already defined in the base type through {nameof(SpkXmlIncludeDerivedAttribute)}. Inspect the type {property.PropertyType.Name} and/or rename custom type mapping in collection.");
 
                     includeMappings[kvp.Key] = kvp.Value;
                 }

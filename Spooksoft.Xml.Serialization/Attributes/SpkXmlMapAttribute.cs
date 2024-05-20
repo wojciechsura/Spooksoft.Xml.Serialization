@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization.Attributes
 {
-    [Obsolete("Please use SpkXmlIgnoreAttribute instead to avoid clash with System.Xml.Serialization namespace.")]
-    public class XmlIgnoreAttribute : SpkXmlIgnoreAttribute
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+    public class SpkXmlMapAttribute : Attribute
     {
+
     }
 }

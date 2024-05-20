@@ -4,14 +4,16 @@ Since there is no good solution for (de)serializing immutable models to/from XML
 
 Usage is very similar to System.Xml.Serialization - even names of the attributes are similar.
 
+**Since 1.0.5**: `[Xml...]` attribute names were replaced with `[SpkXml...]` to avoid clash with `System.Xml.Serialization` (e.g. Visual Studio is more eager to suggest System.Xml.Serialization over other namespaces). Original attribute names are kept as aliases for now, but **will be removed** in the future releases.
+
 ```csharp
-[XmlRoot("MyModel")]
+[SpkXmlRoot("MyModel")]
 public class MyModel 
 {
-	[XmlElement("MyElement")]
+	[SpkXmlElement("MyElement")]
 	public int IntProperty { get; set; }
 
-	[XmlAttribute("MyAttribute")]
+	[SpkXmlAttribute("MyAttribute")]
 	public DateTime DateTimeProperty { get; set; }
 }
 
@@ -34,7 +36,7 @@ To (de)serialize immutable models, the following requirements must be met:
 Example:
 
 ```csharp
-[XmlRoot("MyImmutableModel")]
+[SpkXmlRoot("MyImmutableModel")]
 public class MyImmutableModel 
 {
 	public MyImmutableModel(string stringProp, int intProp) 
@@ -55,19 +57,19 @@ If a property is of reference type and can contain an instance of derived type, 
 ```csharp
 public class MyClass
 {
-    [XmlVariant("Base", typeof(BaseType))]
-    [XmlVariant("Derived1", typeof(DerivedType1))]
-    [XmlVariant("Derived2", typeof(DerivedType2))]
+    [SpkXmlVariant("Base", typeof(BaseType))]
+    [SpkXmlVariant("Derived1", typeof(DerivedType1))]
+    [SpkXmlVariant("Derived2", typeof(DerivedType2))]
     public BaseType Prop { get; set; }
 }
 ```
 
-This can be also achieved differently, by using `XmlIncludeDerived` attribute on base property type:
+This can be also achieved differently, by using `SpkXmlIncludeDerived` attribute on base property type:
 
 ```csharp
-[XmlIncludeDerived("Base", typeof(BaseType))]
-[XmlIncludeDerived("Derived1", typeof(DerivedType1))]
-[XmlIncludeDerived("Derived2", typeof(DerivedType2))]
+[SpkXmlIncludeDerived("Base", typeof(BaseType))]
+[SpkXmlIncludeDerived("Derived1", typeof(DerivedType1))]
+[SpkXmlIncludeDerived("Derived2", typeof(DerivedType2))]
 public class BaseType
 {
 
@@ -82,12 +84,12 @@ public class MyClass
 
 The same will work as well for collections and maps (see below).
 
-If you use both `XmlIncludeDerived` and `XmlVariant` (or `XmlArrayItem` in case of collections or `XmlMapKey`/`XmlMapValue` in case of maps), then all mapped types will be merged. 
+If you use both `SpkXmlIncludeDerived` and `SpkXmlVariant` (or `SpkXmlArrayItem` in case of collections or `SpkXmlMapKey`/`SpkXmlMapValue` in case of maps), then all mapped types will be merged. 
 
 Note that neither **names** nor **types** in the custom mapping lists must not duplicate:
 
 ```csharp
-[XmlIncludeDerived("Derived1", typeof(DerivedType1))]
+[SpkXmlIncludeDerived("Derived1", typeof(DerivedType1))]
 public class BaseType
 {
 
@@ -96,39 +98,40 @@ public class BaseType
 public class MyModel
 {
     // WRONG! Name Derived1 has already been used
-    [XmlVariant("Derived1", typeof(SomeType))]
+    [SpkXmlVariant("Derived1", typeof(SomeType))]
     // WRONG! Type DerivedType1 has already been mapped
-    [XmlVariant("SomeName", typeof(DerivedType1))]
+    [SpkXmlVariant("SomeName", typeof(DerivedType1))]
     public BaseType Prop { get; set; }
 }
 ```
 
 # Collections
 
-Collections must be marked with `XmlArray` attribute. If you want to support various types in the collection, add `XmlArrayItem` attributes.
+Collections must be marked with `SpkXmlArray` attribute. If you want to support various types in the collection, add `SpkXmlArrayItem` attributes.
 
 So far the following collections are supported:
 
 * `List<T>`
-* `IReadOnlyList<T>` (filled during deserialization with `List<T>`)
+* `IReadOnlyList<T>` (filled during deserialization with `List<T>` instances)
 * `T[]` (for now, only single-dimensional arrays are supported)
+* `ImmutableArray<T>`
 
 ```csharp
 public class MyModel 
 {
-    [XmlArray]
-    [XmlArrayItem("ItemType1", typeof(ItemType1))]
-    [XmlArrayItem("ItemType2", typeof(ItemType2))]
+    [SpkXmlArray]
+    [SpkXmlArrayItem("ItemType1", typeof(ItemType1))]
+    [SpkXmlArrayItem("ItemType2", typeof(ItemType2))]
     public List<BaseItemType> Collection { get; set; }
 
-    [XmlArray]
+    [SpkXmlArray]
     public int[] MyArray { get; set; }
 }
 ```
 
 # Maps
 
-Map properties (e.g. `Dictionary<,>`) must be marked with `XmlMapAttribute` attribute. If you want to support various types for either keys or values, add one or more `XmlMapKeyAttribute` or `XmlMapValueAttribute` attributes to the property.
+Map properties (e.g. `Dictionary<,>`) must be marked with `SpkXmlMapAttribute` attribute. If you want to support various types for either keys or values, add one or more `SpkXmlMapKeyAttribute` or `SpkXmlMapValueAttribute` attributes to the property.
 
 So far the following maps are supported:
 
@@ -137,18 +140,18 @@ So far the following maps are supported:
 ```csharp
 public class MyModel
 {
-    [XmlMap]
-    [XmlMapKey("Base", typeof(BaseKey))]
-    [XmlMapKey("Derived", typeof(DerivedKey))]
-    [XmlMapValue("Base", typeof(BaseValue))]
-    [XmlMapValue("Derived", typeof(DerivedValue))]
+    [SpkXmlMap]
+    [SpkXmlMapKey("Base", typeof(BaseKey))]
+    [SpkXmlMapKey("Derived", typeof(DerivedKey))]
+    [SpkXmlMapValue("Base", typeof(BaseValue))]
+    [SpkXmlMapValue("Derived", typeof(DerivedValue))]
     public Dictionary<BaseKey, BaseValue> Dictionary { get; set; }
 }
 ```
 
 # Binary
 
-To serialize binary data, use `XmlBinaryAttribute` attribute. Data will be serialized in the Base64 format.
+To serialize binary data, use `SpkXmlBinaryAttribute` attribute. Data will be serialized in the Base64 format.
 
 So far the following types of properties can be treated as binary:
 
@@ -157,7 +160,7 @@ So far the following types of properties can be treated as binary:
 ```csharp
 public class MyModel
 {
-    [XmlBinary]
+    [SpkXmlBinary]
     public byte[] SomeData { get; set; }
 }
 ```
@@ -215,8 +218,9 @@ public class CustomSerializedModel : IXmlSerializable
 
 # Known limitations
 
-* `null` value in a string property serialized to an attribute will be deserialized as an empty string. If you want to keep the null value, serialize it to an element instead (`[XmlElement(...)]`).
-* You need to separately define `XmlArray` and `XmlElement` attributes (if you want to specify custom name for array element). You can not store collections inside an attribute. The same applies to maps and binary data.
+* `null` value in a string property serialized to an attribute will be deserialized as an empty string. If you want to keep the null value, serialize it to an element instead (`[SpkXmlElement(...)]`).
+* You need to separately define `SpkXmlArray` and `SpkXmlElement` attributes (if you want to specify custom name for array element).
+* You can not store collections inside an attribute. The same applies to maps and binary data.
 
 # Development
 

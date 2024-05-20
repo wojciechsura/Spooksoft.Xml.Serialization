@@ -9,22 +9,22 @@ namespace Spooksoft.Xml.Serialization.Test.Models.CustomMapping
 {
     public class CustomMappingModel
     {
-        [XmlVariant("Derived2", typeof(DerivedPropertyType2))]
+        [SpkXmlVariant("Derived2", typeof(DerivedPropertyType2))]
         public BasePropertyType? Property1 { get; set; }
 
-        [XmlVariant("Derived2", typeof(DerivedPropertyType2))]
+        [SpkXmlVariant("Derived2", typeof(DerivedPropertyType2))]
         public BasePropertyType? Property2 { get; set; }
 
-        [XmlVariant("Derived2", typeof(DerivedPropertyType2))]
+        [SpkXmlVariant("Derived2", typeof(DerivedPropertyType2))]
         public BasePropertyType? Property3 { get; set; }
 
-        [XmlArray]
-        [XmlArrayItem("Derived2", typeof(DerivedPropertyType2))]        
+        [SpkXmlArray]
+        [SpkXmlArrayItem("Derived2", typeof(DerivedPropertyType2))]        
         public List<BasePropertyType?>? List { get; set; }
 
-        [XmlMap]
-        [XmlMapKey("Derived2", typeof(DerivedPropertyType2))]
-        [XmlMapValue("Derived2", typeof(DerivedPropertyType2))]
+        [SpkXmlMap]
+        [SpkXmlMapKey("Derived2", typeof(DerivedPropertyType2))]
+        [SpkXmlMapValue("Derived2", typeof(DerivedPropertyType2))]
         public Dictionary<BasePropertyType, BasePropertyType?>? Dictionary { get; set; }
     }
 }

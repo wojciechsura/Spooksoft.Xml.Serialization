@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Spooksoft.Xml.Serialization.Attributes
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class XmlBinaryAttribute : Attribute
+    public class SpkXmlBinaryAttribute : Attribute
     {
 
     }

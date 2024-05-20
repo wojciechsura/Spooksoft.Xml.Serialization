@@ -14,7 +14,7 @@ namespace Spooksoft.Xml.Serialization.Test.Models.Simple
             List = list;
         }
 
-        [XmlArray]
+        [SpkXmlArray]
         public IReadOnlyList<ImmutableModel> List { get; }
     }
 }

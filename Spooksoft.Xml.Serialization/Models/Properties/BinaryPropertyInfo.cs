@@ -12,7 +12,7 @@ namespace Spooksoft.Xml.Serialization.Models.Properties
     {
         public BinaryPropertyInfo(
             PropertyInfo property,
-            XmlPlacementAttribute? placementAttribute,
+            SpkXmlPlacementAttribute? placementAttribute,
             int? constructorParameterIndex) 
             : base(property, placementAttribute, constructorParameterIndex)
         {

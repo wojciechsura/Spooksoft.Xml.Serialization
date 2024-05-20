@@ -12,7 +12,7 @@ namespace Spooksoft.Xml.Serialization.Models
     internal class ClassCustomSerializationInfo : BaseClassInfo
     {
         public ClassCustomSerializationInfo(Type type,
-            XmlRootAttribute? rootAttribute, 
+            SpkXmlRootAttribute? rootAttribute, 
             ParameterlessClassConstructionInfo constructor) 
             : base(type, rootAttribute)
         {

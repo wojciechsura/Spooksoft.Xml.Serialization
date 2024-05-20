@@ -8,15 +8,15 @@
     <Description>Simple XML Serializer supporting serialization of immutable types</Description>
     <PackageProjectUrl>https://github.com/wojciechsura/Spooksoft.Xml.Serialization</PackageProjectUrl>
     <RepositoryUrl>https://github.com/wojciechsura/Spooksoft.Xml.Serialization</RepositoryUrl>
-    <PackageReleaseNotes>Added support for ImmutableArray&lt;T&gt;</PackageReleaseNotes>
+    <PackageReleaseNotes>Replaced [Xml...] attributes with [SpkXml...] to avoid clash with System.Xml.Serialization namespace. Old names are temporarily kept as obsolete aliases, but will eventually be removed in future releases.</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Authors>spook</Authors>
     <Company>Spooksoft</Company>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <AssemblyVersion>1.0.4</AssemblyVersion>
-    <FileVersion>1.0.4</FileVersion>
-    <Version>1.0.4</Version>
+    <AssemblyVersion>1.0.5</AssemblyVersion>
+    <FileVersion>1.0.5</FileVersion>
+    <Version>1.0.5</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0|AnyCPU'">

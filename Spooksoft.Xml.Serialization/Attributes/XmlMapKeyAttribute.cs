@@ -6,16 +6,11 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization.Attributes
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
-    public class XmlMapKeyAttribute : Attribute
+    [Obsolete("Please use SpkXmlMapKeyAttribute instead to avoid clash with System.Xml.Serialization namespace.")]
+    public class XmlMapKeyAttribute : SpkXmlMapKeyAttribute
     {
-        public XmlMapKeyAttribute(string name, Type type)
+        public XmlMapKeyAttribute(string name, Type type) : base(name, type)
         {
-            Name = name;
-            Type = type;
         }
-
-        public string Name { get; }
-        public Type Type { get; }
     }
 }

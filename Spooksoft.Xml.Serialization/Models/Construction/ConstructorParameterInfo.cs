@@ -10,13 +10,13 @@ namespace Spooksoft.Xml.Serialization.Models.Construction
 {
     internal class ConstructorParameterInfo
     {
-        public ConstructorParameterInfo(PropertyInfo matchingProperty, XmlPlacementAttribute? xmlPlacement)
+        public ConstructorParameterInfo(PropertyInfo matchingProperty, SpkXmlPlacementAttribute? xmlPlacement)
         {
             MatchingProperty = matchingProperty;
             XmlPlacement = xmlPlacement;
         }
 
         public PropertyInfo MatchingProperty { get; }
-        public XmlPlacementAttribute? XmlPlacement { get; }
+        public SpkXmlPlacementAttribute? XmlPlacement { get; }
     }
 }

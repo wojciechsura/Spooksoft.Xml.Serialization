@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Spooksoft.Xml.Serialization.Test.Models.CustomMapping
 {
-    [XmlIncludeDerived("Base", typeof(BasePropertyType))]
-    [XmlIncludeDerived("Derived1", typeof(DerivedPropertyType1))]
+    [SpkXmlIncludeDerived("Base", typeof(BasePropertyType))]
+    [SpkXmlIncludeDerived("Derived1", typeof(DerivedPropertyType1))]
     // DerivedPropertyType2 is missing on purpose! See CustomMappingModel.
     public class BasePropertyType
     {

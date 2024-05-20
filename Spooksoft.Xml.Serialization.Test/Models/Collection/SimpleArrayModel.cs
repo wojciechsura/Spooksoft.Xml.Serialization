@@ -9,7 +9,7 @@ namespace Spooksoft.Xml.Serialization.Test.Models.Collection
 {
     public class SimpleArrayModel
     {
-        [XmlArray]
+        [SpkXmlArray]
         public int[]? ArrayProp { get; set; }
     }
 }

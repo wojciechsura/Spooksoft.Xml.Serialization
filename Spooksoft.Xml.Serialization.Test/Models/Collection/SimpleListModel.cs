@@ -9,8 +9,8 @@ namespace Spooksoft.Xml.Serialization.Test.Models.Collection
 {
     public class SimpleListModel
     {
-        [XmlArray]
-        [XmlElement("MyList")]
+        [SpkXmlArray]
+        [SpkXmlElement("MyList")]
         public List<string?>? Strings { get; set; }
     }
 }

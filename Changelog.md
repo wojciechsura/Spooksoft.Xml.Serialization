@@ -16,3 +16,7 @@
 # 1.0.3
 
 * [new] Added attribute `XmlIncludeDerived` to simplify working with class hierarchies
+
+# 1.0.4
+
+* [new] Added support for `ImmutableArray<T>`.

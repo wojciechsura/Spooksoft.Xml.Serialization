@@ -2,6 +2,7 @@
 using Spooksoft.Xml.Serialization.Test.Utils;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -227,6 +228,41 @@ namespace Spooksoft.Xml.Serialization.Test
             Assert.IsNotNull(deserialized.ArrayProp[2]);
             Assert.IsInstanceOfType(deserialized.ArrayProp[2], typeof(ListItemB));
             Assert.AreEqual(2, ((ListItemB)deserialized.ArrayProp[2]!).IntProperty);
+        }
+
+        [TestMethod]
+        public void ImmutableArraySerializationTest()
+        {
+            // Arrange
+
+            var model = new ImmutableArrayModel()
+            {
+                ImmutableArray = ImmutableArray.Create<BaseListItem?>(new ListItemA { IntProperty = 1 },
+                    null,
+                    new ListItemB { IntProperty = 2 }
+                )
+            };
+            var serializer = new XmlSerializer();
+
+            // Act
+
+            var deserialized = Automate.SerializeDeserialize(model, serializer);
+
+            // Assert
+
+            Assert.IsNotNull(deserialized);
+            Assert.IsNotNull(deserialized.ImmutableArray);
+            Assert.AreEqual(3, deserialized.ImmutableArray.Length);
+
+            Assert.IsNotNull(deserialized.ImmutableArray[0]);
+            Assert.IsInstanceOfType(deserialized.ImmutableArray[0], typeof(ListItemA));
+            Assert.AreEqual(1, ((ListItemA)deserialized.ImmutableArray[0]!).IntProperty);
+
+            Assert.IsNull(deserialized.ImmutableArray[1]);
+
+            Assert.IsNotNull(deserialized.ImmutableArray[2]);
+            Assert.IsInstanceOfType(deserialized.ImmutableArray[2], typeof(ListItemB));
+            Assert.AreEqual(2, ((ListItemB)deserialized.ImmutableArray[2]!).IntProperty);
         }
     }
 }
